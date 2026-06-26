@@ -313,117 +313,6 @@ export default function Page() {
               </div>
             </div>
 
-            {/* TRANSFORMED SEARCH VIEW: Show categories of Clients & Talents in different fields */}
-            <div className={`transition-all duration-700 ease-in-out origin-top ${
-              isSearchActive 
-                ? "opacity-100 max-h-[2000px] translate-y-0 pt-4" 
-                : "opacity-0 max-h-0 overflow-hidden translate-y-4"
-            }`}>
-              <div className="border border-border bg-white dark:bg-zinc-900 p-6 lg:p-8 shadow-xl space-y-8">
-                
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border/80 pb-4 gap-2">
-                  <div>
-                    <h3 className="font-serif text-xl font-bold">Search Directory Matches</h3>
-                    <p className="text-xs text-neutral-400 font-light mt-0.5">
-                      Vetted clients and student creators active across Nigerian institutions.
-                    </p>
-                  </div>
-                  <span className="bg-primary/20 text-primary border border-primary/30 text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 inline-block self-start sm:self-center">
-                    {filteredGigs.length + filteredProjects.length} Matches Found
-                  </span>
-                </div>
-
-                {/* Grid of Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  
-                  {/* Column 1: Tech & Coding */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 border-b border-border/50 pb-2">
-                      <Code className="h-4 w-4 text-primary" />
-                      <h4 className="font-serif text-base font-bold text-foreground">Tech & Code</h4>
-                    </div>
-                    <div className="space-y-3 max-h-[380px] overflow-y-auto scrollbar-none pr-1">
-                      {filteredGigs.filter(g => g.category === "Code & Dev" || g.category === "Technical Services").map(gig => (
-                        <div key={gig.id} className="p-3 border border-border bg-background hover:border-primary transition-all">
-                          <span className="text-[9px] font-bold text-primary uppercase">{gig.school.split(" (")[1]?.replace(")", "") || "Campus"}</span>
-                          <h5 className="text-xs font-semibold text-foreground line-clamp-1 mt-0.5">{gig.title}</h5>
-                          <p className="text-[10px] text-neutral-400 mt-1">by {gig.name} • ₦{gig.startingPrice}</p>
-                        </div>
-                      ))}
-                      {filteredProjects.filter(p => p.category === "Code & Dev" || p.category === "Technical Services").map(proj => (
-                        <div key={proj.id} className="p-3 border border-border border-dashed bg-primary/5 hover:border-primary transition-all">
-                          <span className="text-[9px] font-bold text-neutral-500 uppercase">Client Need • ₦{proj.budget}</span>
-                          <h5 className="text-xs font-semibold text-foreground line-clamp-1 mt-0.5">{proj.title}</h5>
-                          <p className="text-[10px] text-neutral-400 mt-1">by {proj.clientName}</p>
-                        </div>
-                      ))}
-                      {filteredGigs.filter(g => g.category === "Code & Dev" || g.category === "Technical Services").length === 0 &&
-                       filteredProjects.filter(p => p.category === "Code & Dev" || p.category === "Technical Services").length === 0 && (
-                        <p className="text-[11px] text-neutral-400 italic">No matches in Tech.</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Column 2: Fashion & Style */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 border-b border-border/50 pb-2">
-                      <Scissors className="h-4 w-4 text-primary" />
-                      <h4 className="font-serif text-base font-bold text-foreground">Fashion & Glam</h4>
-                    </div>
-                    <div className="space-y-3 max-h-[380px] overflow-y-auto scrollbar-none pr-1">
-                      {filteredGigs.filter(g => g.category === "Fashion & Crafts" || g.category === "Beauty & Style").map(gig => (
-                        <div key={gig.id} className="p-3 border border-border bg-background hover:border-primary transition-all">
-                          <span className="text-[9px] font-bold text-primary uppercase">{gig.school.split(" (")[1]?.replace(")", "") || "Campus"}</span>
-                          <h5 className="text-xs font-semibold text-foreground line-clamp-1 mt-0.5">{gig.title}</h5>
-                          <p className="text-[10px] text-neutral-400 mt-1">by {gig.name} • ₦{gig.startingPrice}</p>
-                        </div>
-                      ))}
-                      {filteredProjects.filter(p => p.category === "Fashion & Crafts" || p.category === "Beauty & Style").map(proj => (
-                        <div key={proj.id} className="p-3 border border-border border-dashed bg-primary/5 hover:border-primary transition-all">
-                          <span className="text-[9px] font-bold text-neutral-400 uppercase">Client Need • ₦{proj.budget}</span>
-                          <h5 className="text-xs font-semibold text-foreground line-clamp-1 mt-0.5">{proj.title}</h5>
-                          <p className="text-[10px] text-neutral-400 mt-1">by {proj.clientName}</p>
-                        </div>
-                      ))}
-                      {filteredGigs.filter(g => g.category === "Fashion & Crafts" || g.category === "Beauty & Style").length === 0 &&
-                       filteredProjects.filter(p => p.category === "Fashion & Crafts" || p.category === "Beauty & Style").length === 0 && (
-                        <p className="text-[11px] text-neutral-400 italic">No matches in Fashion.</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Column 3: Media & Tutoring */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 border-b border-border/50 pb-2">
-                      <Camera className="h-4 w-4 text-primary" />
-                      <h4 className="font-serif text-base font-bold text-foreground">Media & Academics</h4>
-                    </div>
-                    <div className="space-y-3 max-h-[380px] overflow-y-auto scrollbar-none pr-1">
-                      {filteredGigs.filter(g => g.category === "Visual Media" || g.category === "Academics").map(gig => (
-                        <div key={gig.id} className="p-3 border border-border bg-background hover:border-primary transition-all">
-                          <span className="text-[9px] font-bold text-primary uppercase">{gig.school.split(" (")[1]?.replace(")", "") || "Campus"}</span>
-                          <h5 className="text-xs font-semibold text-foreground line-clamp-1 mt-0.5">{gig.title}</h5>
-                          <p className="text-[10px] text-neutral-400 mt-1">by {gig.name} • ₦{gig.startingPrice}</p>
-                        </div>
-                      ))}
-                      {filteredProjects.filter(p => p.category === "Visual Media" || p.category === "Academics").map(proj => (
-                        <div key={proj.id} className="p-3 border border-border border-dashed bg-primary/5 hover:border-primary transition-all">
-                          <span className="text-[9px] font-bold text-neutral-400 uppercase">Client Need • ₦{proj.budget}</span>
-                          <h5 className="text-xs font-semibold text-foreground line-clamp-1 mt-0.5">{proj.title}</h5>
-                          <p className="text-[10px] text-neutral-400 mt-1">by {proj.clientName}</p>
-                        </div>
-                      ))}
-                      {filteredGigs.filter(g => g.category === "Visual Media" || g.category === "Academics").length === 0 &&
-                       filteredProjects.filter(p => p.category === "Visual Media" || p.category === "Academics").length === 0 && (
-                        <p className="text-[11px] text-neutral-400 italic">No matches in Media/Tutoring.</p>
-                      )}
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-
           </div>
 
           {/* Right Asymmetric Gallery (Slides right and fades out on active search) */}
@@ -487,7 +376,7 @@ export default function Page() {
       </section>
 
       {/* 3. VALUE PROPOSITION SECTION */}
-      <section id="value" className="bg-secondary text-secondary-foreground py-16 px-6 lg:px-24">
+      <section id="value" className={`bg-secondary text-secondary-foreground py-16 px-6 lg:px-24 transition-all duration-500 ${isSearchActive ? "hidden opacity-0 pointer-events-none" : "opacity-100"}`}>
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-secondary-foreground/20 pb-12 mb-12">
             <div>
@@ -532,14 +421,18 @@ export default function Page() {
       </section>
 
       {/* 4. THE MARKETPLACE HUB (The Showcase / The Exchange Toggle) */}
-      <section id="marketplace" className="px-6 py-20 lg:px-24 bg-white dark:bg-zinc-950 flex-1">
+      <section id="marketplace" className={`px-6 lg:px-24 bg-white dark:bg-zinc-950 flex-1 transition-all duration-500 ${isSearchActive ? "py-8" : "py-20"}`}>
         <div className="max-w-7xl mx-auto">
           
           {/* Header & Tabs */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div>
-              <span className="text-xs uppercase tracking-widest text-primary font-bold">Active Board</span>
-              <h2 className="font-serif text-3xl md:text-5xl font-light mt-2">Direct Marketplace</h2>
+              <span className="text-xs uppercase tracking-widest text-primary font-bold">
+                {isSearchActive ? "Filtered Search Results" : "Active Board"}
+              </span>
+              <h2 className="font-serif text-3xl md:text-5xl font-light mt-2">
+                {isSearchActive && searchQuery ? `Showing Results for "${searchQuery}"` : "Direct Marketplace"}
+              </h2>
             </div>
             
             {/* Dual Bidding Tabs */}
@@ -730,7 +623,7 @@ export default function Page() {
       </section>
 
       {/* 5. PROCESS SECTION (How It Works) */}
-      <section id="how-it-works" className="bg-neutral-950 text-white py-20 px-6 lg:px-24">
+      <section id="how-it-works" className={`bg-neutral-950 text-white py-20 px-6 lg:px-24 transition-all duration-500 ${isSearchActive ? "hidden opacity-0 pointer-events-none" : "opacity-100"}`}>
         <div className="max-w-7xl mx-auto">
           <div className="max-w-xl space-y-4 mb-16">
             <span className="text-xs uppercase tracking-widest text-primary font-bold">Matchmaking Steps</span>
@@ -780,7 +673,7 @@ export default function Page() {
       </section>
 
       {/* 6. CALL TO ACTION (CTA) */}
-      <section className="bg-primary text-primary-foreground py-20 px-6 lg:px-24 text-center">
+      <section className={`bg-primary text-primary-foreground py-20 px-6 lg:px-24 text-center transition-all duration-500 ${isSearchActive ? "hidden opacity-0 pointer-events-none" : "opacity-100"}`}>
         <div className="max-w-4xl mx-auto space-y-8">
           <h2 className="font-serif text-4xl md:text-6xl font-light">
             Ready to unleash elite student value?
