@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { 
   Search, 
   MapPin, 
@@ -194,14 +195,19 @@ export default function Page() {
           </nav>
 
           {/* Action CTAs */}
-          <div className="flex items-center gap-4">
-            <button className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground hover:text-primary transition-colors">
-              <Compass className="h-4 w-4" />
-              Directory
-            </button>
-            <button className="bg-primary text-primary-foreground font-semibold uppercase text-xs tracking-wider px-5 py-2.5 hover:bg-foreground hover:text-background transition-all duration-300">
+          <div className="flex items-center gap-6">
+            <Link 
+              href="/auth/login" 
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground hover:text-primary transition-colors"
+            >
+              Log In
+            </Link>
+            <Link 
+              href="/auth/signup" 
+              className="bg-primary text-primary-foreground font-semibold uppercase text-xs tracking-wider px-5 py-2.5 hover:bg-foreground hover:text-background transition-all duration-300"
+            >
               Join as Talent
-            </button>
+            </Link>
           </div>
         </div>
       </header>
@@ -620,12 +626,18 @@ export default function Page() {
             Whether you are a Nigerian student looking to earn legitimate income on campus or a client seeking affordable, premium crafts and services.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <button className="bg-foreground text-background font-semibold uppercase text-xs tracking-wider px-8 py-4 hover:bg-neutral-900 transition-colors">
+            <Link 
+              href="/auth/signup"
+              className="bg-foreground text-background font-semibold uppercase text-xs tracking-wider px-8 py-4 hover:bg-neutral-900 transition-colors inline-block"
+            >
               Find Talents
-            </button>
-            <button className="border border-foreground text-foreground font-semibold uppercase text-xs tracking-wider px-8 py-4 hover:bg-foreground hover:text-background transition-colors">
+            </Link>
+            <Link 
+              href="/auth/signup"
+              className="border border-foreground text-foreground font-semibold uppercase text-xs tracking-wider px-8 py-4 hover:bg-foreground hover:text-background transition-colors inline-block"
+            >
               List Your Services
-            </button>
+            </Link>
           </div>
         </div>
       </section>
