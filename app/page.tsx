@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import ThemeToggle from "@/components/theme-toggle";
 import { 
   Search, 
   MapPin, 
@@ -196,6 +197,7 @@ export default function Page() {
 
           {/* Action CTAs */}
           <div className="flex items-center gap-6">
+            <ThemeToggle />
             <Link 
               href="/auth/login" 
               className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground hover:text-primary transition-colors"

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import ThemeToggle from "@/components/theme-toggle";
 import { 
   ArrowLeft, 
   User, 
@@ -106,8 +107,8 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       
-      {/* Back Button */}
-      <div className="absolute top-6 left-6 z-20">
+      {/* Top Bar for Back Navigation & Theme Toggle */}
+      <div className="absolute top-6 left-6 right-6 z-20 flex items-center justify-between">
         <Link 
           href="/" 
           className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-foreground/80 hover:text-primary transition-colors"
@@ -115,6 +116,7 @@ export default function SignupPage() {
           <ArrowLeft className="h-4 w-4" />
           Back to home
         </Link>
+        <ThemeToggle />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 min-h-screen">
