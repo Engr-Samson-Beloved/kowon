@@ -259,7 +259,7 @@ export default function Page() {
                   Search Directory Active
                 </span>
               )}
-              <div className={`flex items-center bg-white dark:bg-neutral-900 border border-border p-2 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-500 ease-in-out ${
+              <div className={`flex items-center bg-card border border-border p-2 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-500 ease-in-out ${
                 isSearchActive ? "shadow-lg max-w-3xl border-primary" : "max-w-lg"
               }`}>
                 <Search className="h-5 w-5 text-neutral-400 mx-2" />
@@ -421,7 +421,7 @@ export default function Page() {
       </section>
 
       {/* 4. THE MARKETPLACE HUB (The Showcase / The Exchange Toggle) */}
-      <section id="marketplace" className={`px-6 lg:px-24 bg-white dark:bg-zinc-950 flex-1 transition-all duration-500 ${isSearchActive ? "py-8" : "py-20"}`}>
+      <section id="marketplace" className={`px-6 lg:px-24 bg-background text-foreground flex-1 transition-all duration-500 ${isSearchActive ? "py-8" : "py-20"}`}>
         <div className="max-w-7xl mx-auto">
           
           {/* Header & Tabs */}
@@ -487,7 +487,7 @@ export default function Page() {
                     return (
                       <div 
                         key={gig.id} 
-                        className="group relative bg-background border border-border p-6 transition-all duration-500 hover:shadow-xl hover:border-primary flex flex-col justify-between"
+                        className="group relative bg-card text-card-foreground border border-border p-6 transition-all duration-500 hover:shadow-xl hover:border-primary flex flex-col justify-between"
                       >
                         <div>
                           {/* Banner background representation */}
@@ -557,7 +557,7 @@ export default function Page() {
                 filteredProjects.map((project) => (
                   <div 
                     key={project.id} 
-                    className="border border-border bg-background p-6 lg:p-8 hover:border-primary transition-all duration-300 flex flex-col lg:flex-row lg:items-center justify-between gap-6"
+                    className="border border-border bg-card text-card-foreground p-6 lg:p-8 hover:border-primary transition-all duration-300 flex flex-col lg:flex-row lg:items-center justify-between gap-6"
                   >
                     <div className="space-y-3 max-w-2xl">
                       <div className="flex items-center gap-3">
@@ -598,7 +598,7 @@ export default function Page() {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-20 border border-dashed border-border bg-neutral-50 dark:bg-neutral-900">
+                <div className="text-center py-20 border border-dashed border-border bg-card text-card-foreground">
                   <HelpCircle className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
                   <h3 className="text-lg font-serif">No Active Projects</h3>
                   <p className="text-sm text-neutral-400 max-w-xs mx-auto mt-2">There are no client bids listed under this category right now.</p>
@@ -606,12 +606,12 @@ export default function Page() {
               )}
 
               {/* Client CTAs */}
-              <div className="border border-border bg-primary/5 p-6 flex flex-col sm:flex-row items-center justify-between gap-4 mt-12">
+              <div className="border border-border bg-card p-6 flex flex-col sm:flex-row items-center justify-between gap-4 mt-12">
                 <div>
                   <h4 className="font-serif text-lg font-bold">Have a custom task or craft project?</h4>
-                  <p className="text-xs text-neutral-500">Post it and invite verified campus talents to pitch their best bids.</p>
+                  <p className="text-xs text-muted-foreground">Post it and invite verified campus talents to pitch their best bids.</p>
                 </div>
-                <button className="flex items-center gap-2 bg-foreground text-background dark:bg-white dark:text-black font-semibold uppercase text-xs tracking-wider px-6 py-3 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                <button className="flex items-center gap-2 bg-foreground text-background font-semibold uppercase text-xs tracking-wider px-6 py-3 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
                   <Plus className="h-4 w-4" />
                   Post a Project
                 </button>

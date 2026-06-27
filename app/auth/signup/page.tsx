@@ -181,7 +181,7 @@ export default function SignupPage() {
         </div>
 
         {/* Right Side: Signup Form Wizard (Spans 7 columns) */}
-        <div className="lg:col-span-7 flex flex-col justify-center px-6 py-20 md:px-16 lg:px-24 bg-white dark:bg-zinc-950">
+        <div className="lg:col-span-7 flex flex-col justify-center px-6 py-20 md:px-16 lg:px-24 bg-card text-card-foreground">
           <div className="max-w-md w-full mx-auto space-y-8">
             
             {/* Header */}
