@@ -55,8 +55,8 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   
-  --font-serif: var(--font-cormorant), Georgia, serif;
-  --font-sans: var(--font-jakarta), sans-serif;
+  --font-serif: var(--font-open-sans), sans-serif;
+  --font-sans: var(--font-public-sans), sans-serif;
   
   --radius-sm: 0px;
   --radius-md: 0px;
