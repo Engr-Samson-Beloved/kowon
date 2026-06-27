@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import ThemeToggle from "@/components/theme-toggle";
+import ScrollAnimate from "@/components/scroll-animate";
 import { 
   Search, 
   MapPin, 
@@ -378,44 +379,54 @@ export default function Page() {
       {/* 3. VALUE PROPOSITION SECTION */}
       <section id="value" className={`bg-secondary text-secondary-foreground py-16 px-6 lg:px-24 transition-all duration-500 ${isSearchActive ? "hidden opacity-0 pointer-events-none" : "opacity-100"}`}>
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-secondary-foreground/20 pb-12 mb-12">
-            <div>
-              <span className="text-xs uppercase tracking-widest text-primary font-bold">Why KÓ WON Matters</span>
-              <h2 className="font-serif text-3xl md:text-5xl font-light mt-2">Redefining Affordable Excellence</h2>
+          <ScrollAnimate variant="fade">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-secondary-foreground/20 pb-12 mb-12">
+              <div>
+                <span className="text-xs uppercase tracking-widest text-primary font-bold">Why KÓ WON Matters</span>
+                <h2 className="font-serif text-3xl md:text-5xl font-light mt-2">Redefining Affordable Excellence</h2>
+              </div>
+              <p className="max-w-md text-sm text-secondary-foreground/75 leading-relaxed">
+                We leverage verified university rosters to offer professional-grade work from highly ambitious students without the corporate agency price tag.
+              </p>
             </div>
-            <p className="max-w-md text-sm text-secondary-foreground/75 leading-relaxed">
-              We leverage verified university rosters to offer professional-grade work from highly ambitious students without the corporate agency price tag.
-            </p>
-          </div>
+          </ScrollAnimate>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="space-y-4">
-              <div className="bg-primary/10 text-primary border border-primary/30 p-3 inline-block">
-                <CheckCircle className="h-6 w-6" />
+            <ScrollAnimate variant="slide-up" delay={0}>
+              <div className="space-y-4">
+                <div className="bg-primary/10 text-primary border border-primary/30 p-3 inline-block">
+                  <CheckCircle className="h-6 w-6" />
+                </div>
+                <h3 className="font-serif text-xl font-bold">Vetted Student Rosters</h3>
+                <p className="text-sm text-secondary-foreground/80 leading-relaxed">
+                  Every student freelancer must register with their official institutional credentials, ensuring trust and professional accountability.
+                </p>
               </div>
-              <h3 className="font-serif text-xl font-bold">Vetted Student Rosters</h3>
-              <p className="text-sm text-secondary-foreground/80 leading-relaxed">
-                Every student freelancer must register with their official institutional credentials, ensuring trust and professional accountability.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <div className="bg-primary/10 text-primary border border-primary/30 p-3 inline-block">
-                <Zap className="h-6 w-6" />
+            </ScrollAnimate>
+            
+            <ScrollAnimate variant="slide-up" delay={150}>
+              <div className="space-y-4">
+                <div className="bg-primary/10 text-primary border border-primary/30 p-3 inline-block">
+                  <Zap className="h-6 w-6" />
+                </div>
+                <h3 className="font-serif text-xl font-bold">Guaranteed Affordability</h3>
+                <p className="text-sm text-secondary-foreground/80 leading-relaxed">
+                  True to our name (KÓ WON — *“It's Affordable”*), student services and crafts are structured without inflated administrative costs.
+                </p>
               </div>
-              <h3 className="font-serif text-xl font-bold">Guaranteed Affordability</h3>
-              <p className="text-sm text-secondary-foreground/80 leading-relaxed">
-                True to our name (KÓ WON — *“It's Affordable”*), student services and crafts are structured without inflated administrative costs.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <div className="bg-primary/10 text-primary border border-primary/30 p-3 inline-block">
-                <Star className="h-6 w-6" />
+            </ScrollAnimate>
+            
+            <ScrollAnimate variant="slide-up" delay={300}>
+              <div className="space-y-4">
+                <div className="bg-primary/10 text-primary border border-primary/30 p-3 inline-block">
+                  <Star className="h-6 w-6" />
+                </div>
+                <h3 className="font-serif text-xl font-bold">Direct Secure Escrow</h3>
+                <p className="text-sm text-secondary-foreground/80 leading-relaxed">
+                  Funds are held securely and only released when the client verifies and approves the final craft product or digital deliverable.
+                </p>
               </div>
-              <h3 className="font-serif text-xl font-bold">Direct Secure Escrow</h3>
-              <p className="text-sm text-secondary-foreground/80 leading-relaxed">
-                Funds are held securely and only released when the client verifies and approves the final craft product or digital deliverable.
-              </p>
-            </div>
+            </ScrollAnimate>
           </div>
         </div>
       </section>
@@ -625,77 +636,89 @@ export default function Page() {
       {/* 5. PROCESS SECTION (How It Works) */}
       <section id="how-it-works" className={`bg-neutral-950 text-white py-20 px-6 lg:px-24 transition-all duration-500 ${isSearchActive ? "hidden opacity-0 pointer-events-none" : "opacity-100"}`}>
         <div className="max-w-7xl mx-auto">
-          <div className="max-w-xl space-y-4 mb-16">
-            <span className="text-xs uppercase tracking-widest text-primary font-bold">Matchmaking Steps</span>
-            <h2 className="font-serif text-4xl lg:text-6xl font-light">Simple. Transparent. Secure.</h2>
-            <p className="text-neutral-400 text-sm leading-relaxed">
-              We bridge student side-hustles with client trust using structured checkpoints, keeping jobs secure and quality high.
-            </p>
-          </div>
+          <ScrollAnimate variant="fade">
+            <div className="max-w-xl space-y-4 mb-16">
+              <span className="text-xs uppercase tracking-widest text-primary font-bold">Matchmaking Steps</span>
+              <h2 className="font-serif text-4xl lg:text-6xl font-light">Simple. Transparent. Secure.</h2>
+              <p className="text-neutral-400 text-sm leading-relaxed">
+                We bridge student side-hustles with client trust using structured checkpoints, keeping jobs secure and quality high.
+              </p>
+            </div>
+          </ScrollAnimate>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="space-y-4 relative">
-              <div className="text-5xl font-serif text-primary/30 font-bold">01</div>
-              <h3 className="font-serif text-lg font-bold">Request / Browse</h3>
-              <p className="text-xs text-neutral-400 leading-relaxed">
-                Clients post custom project details to the Bidding Board or buy fixed-rate student services directly from the Showcase.
-              </p>
-              <div className="hidden md:block absolute top-6 right-0 text-primary/30 font-bold">&rarr;</div>
-            </div>
+            <ScrollAnimate variant="slide-up" delay={0}>
+              <div className="space-y-4 relative">
+                <div className="text-5xl font-serif text-primary/30 font-bold">01</div>
+                <h3 className="font-serif text-lg font-bold">Request / Browse</h3>
+                <p className="text-xs text-neutral-400 leading-relaxed">
+                  Clients post custom project details to the Bidding Board or buy fixed-rate student services directly from the Showcase.
+                </p>
+                <div className="hidden md:block absolute top-6 right-0 text-primary/30 font-bold">&rarr;</div>
+              </div>
+            </ScrollAnimate>
             
-            <div className="space-y-4 relative">
-              <div className="text-5xl font-serif text-primary/30 font-bold">02</div>
-              <h3 className="font-serif text-lg font-bold">Secure Fund Lock</h3>
-              <p className="text-xs text-neutral-400 leading-relaxed">
-                The client locks the project budget into the secure KÓ WON escrow vault before the student starts working on the task.
-              </p>
-              <div className="hidden md:block absolute top-6 right-0 text-primary/30 font-bold">&rarr;</div>
-            </div>
+            <ScrollAnimate variant="slide-up" delay={100}>
+              <div className="space-y-4 relative">
+                <div className="text-5xl font-serif text-primary/30 font-bold">02</div>
+                <h3 className="font-serif text-lg font-bold">Secure Fund Lock</h3>
+                <p className="text-xs text-neutral-400 leading-relaxed">
+                  The client locks the project budget into the secure KÓ WON escrow vault before the student starts working on the task.
+                </p>
+                <div className="hidden md:block absolute top-6 right-0 text-primary/30 font-bold">&rarr;</div>
+              </div>
+            </ScrollAnimate>
 
-            <div className="space-y-4 relative">
-              <div className="text-5xl font-serif text-primary/30 font-bold">03</div>
-              <h3 className="font-serif text-lg font-bold">Track & Verify</h3>
-              <p className="text-xs text-neutral-400 leading-relaxed">
-                The student submits intermediate work progress. For physical crafts, before/after lookbook proofs are uploaded for checks.
-              </p>
-              <div className="hidden md:block absolute top-6 right-0 text-primary/30 font-bold">&rarr;</div>
-            </div>
+            <ScrollAnimate variant="slide-up" delay={200}>
+              <div className="space-y-4 relative">
+                <div className="text-5xl font-serif text-primary/30 font-bold">03</div>
+                <h3 className="font-serif text-lg font-bold">Track & Verify</h3>
+                <p className="text-xs text-neutral-400 leading-relaxed">
+                  The student submits intermediate work progress. For physical crafts, before/after lookbook proofs are uploaded for checks.
+                </p>
+                <div className="hidden md:block absolute top-6 right-0 text-primary/30 font-bold">&rarr;</div>
+              </div>
+            </ScrollAnimate>
 
-            <div className="space-y-4">
-              <div className="text-5xl font-serif text-primary/30 font-bold">04</div>
-              <h3 className="font-serif text-lg font-bold">Payout Release</h3>
-              <p className="text-xs text-neutral-400 leading-relaxed">
-                Once the client reviews the deliverable and hits approve, funds are immediately credited to the student's local bank account.
-              </p>
-            </div>
+            <ScrollAnimate variant="slide-up" delay={300}>
+              <div className="space-y-4">
+                <div className="text-5xl font-serif text-primary/30 font-bold">04</div>
+                <h3 className="font-serif text-lg font-bold">Payout Release</h3>
+                <p className="text-xs text-neutral-400 leading-relaxed">
+                  Once the client reviews the deliverable and hits approve, funds are immediately credited to the student's local bank account.
+                </p>
+              </div>
+            </ScrollAnimate>
           </div>
         </div>
       </section>
 
       {/* 6. CALL TO ACTION (CTA) */}
       <section className={`bg-primary text-primary-foreground py-20 px-6 lg:px-24 text-center transition-all duration-500 ${isSearchActive ? "hidden opacity-0 pointer-events-none" : "opacity-100"}`}>
-        <div className="max-w-4xl mx-auto space-y-8">
-          <h2 className="font-serif text-4xl md:text-6xl font-light">
-            Ready to unleash elite student value?
-          </h2>
-          <p className="max-w-xl mx-auto text-sm opacity-90 leading-relaxed">
-            Whether you are a Nigerian student looking to earn legitimate income on campus or a client seeking affordable, premium crafts and services.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link 
-              href="/auth/signup"
-              className="bg-foreground text-background font-semibold uppercase text-xs tracking-wider px-8 py-4 hover:bg-neutral-900 transition-colors inline-block"
-            >
-              Find Talents
-            </Link>
-            <Link 
-              href="/auth/signup"
-              className="border border-foreground text-foreground font-semibold uppercase text-xs tracking-wider px-8 py-4 hover:bg-foreground hover:text-background transition-colors inline-block"
-            >
-              List Your Services
-            </Link>
+        <ScrollAnimate variant="fade-scale">
+          <div className="max-w-4xl mx-auto space-y-8">
+            <h2 className="font-serif text-4xl md:text-6xl font-light">
+              Ready to unleash elite student value?
+            </h2>
+            <p className="max-w-xl mx-auto text-sm opacity-90 leading-relaxed">
+              Whether you are a Nigerian student looking to earn legitimate income on campus or a client seeking affordable, premium crafts and services.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Link 
+                href="/auth/signup"
+                className="bg-foreground text-background font-semibold uppercase text-xs tracking-wider px-8 py-4 hover:bg-neutral-900 transition-colors inline-block"
+              >
+                Find Talents
+              </Link>
+              <Link 
+                href="/auth/signup"
+                className="border border-foreground text-foreground font-semibold uppercase text-xs tracking-wider px-8 py-4 hover:bg-foreground hover:text-background transition-colors inline-block"
+              >
+                List Your Services
+              </Link>
+            </div>
           </div>
-        </div>
+        </ScrollAnimate>
       </section>
 
       {/* 7. FOOTER */}
