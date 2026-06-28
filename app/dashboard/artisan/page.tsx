@@ -448,7 +448,7 @@ export default function ArtisanDashboard() {
             )}
 
             {/* Pitches List */}
-            {activeTab === "showcase" && activeSubTab === "pitches" && (
+            {activeSubTab === "pitches" && (
               <div className="space-y-4">
                 {pitches.map((pitch) => (
                   <div key={pitch.id} className="border border-border bg-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
