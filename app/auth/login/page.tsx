@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/theme-toggle";
 import { 
   ArrowLeft, 
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -30,7 +32,14 @@ export default function LoginPage() {
     setTimeout(() => {
       setIsLoading(false);
       setLoginSuccess(true);
-    }, 1500);
+      setTimeout(() => {
+        if (email.toLowerCase().includes("client") || email.toLowerCase().includes("work") || email.toLowerCase().includes("company")) {
+          router.push("/dashboard/client");
+        } else {
+          router.push("/dashboard/artisan");
+        }
+      }, 1000);
+    }, 1200);
   };
 
   return (

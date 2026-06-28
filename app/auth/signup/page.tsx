@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/theme-toggle";
 import { 
   ArrowLeft, 
@@ -46,6 +47,7 @@ const SKILL_CATEGORIES = [
 ];
 
 export default function SignupPage() {
+  const router = useRouter();
   const [role, setRole] = useState<"student" | "client">("student");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -101,6 +103,13 @@ export default function SignupPage() {
     setTimeout(() => {
       setIsLoading(false);
       setRegistrationSuccess(true);
+      setTimeout(() => {
+        if (role === "student") {
+          router.push("/dashboard/artisan");
+        } else {
+          router.push("/dashboard/client");
+        }
+      }, 1500);
     }, 1500);
   };
 
