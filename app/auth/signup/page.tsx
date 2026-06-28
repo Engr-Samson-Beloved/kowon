@@ -212,13 +212,13 @@ export default function SignupPage() {
                 <Sparkles className="h-10 w-10 text-primary mx-auto" />
                 <h3 className="font-serif text-xl font-bold">Registration Successful</h3>
                 <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                  Welcome to KÓ WON. Your institutional profile is now created. Let's start building your showcase lookbook.
+                  Welcome to KÓ WON. Your profile is now created. Directing you to your workspace...
                 </p>
                 <Link 
-                  href="/auth/login"
+                  href={role === "student" ? "/dashboard/artisan" : "/dashboard/client"}
                   className="inline-block bg-primary text-primary-foreground font-semibold uppercase text-xs tracking-wider px-8 py-3.5 hover:bg-foreground hover:text-background transition-all duration-300 mt-4"
                 >
-                  Log In To Workspace
+                  {role === "student" ? "Go To Artisan Workspace" : "Go To Client Hub"}
                 </Link>
               </div>
             ) : step === 1 ? (
