@@ -176,6 +176,25 @@ export default function Page() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       
+      {/* JSON-LD Structured Schema Markup for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "KÓ WON",
+            "url": "https://kowon.com.ng",
+            "description": "Connecting skilled Nigerian student freelancers and creators with clients seeking affordable, high-end crafts and services.",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://kowon.com.ng/?search={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          })
+        }}
+      />
+
       {/* 1. HEADER (Top Glassmorphic Navigation) */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border px-6 py-4 lg:px-24">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
@@ -216,7 +235,8 @@ export default function Page() {
         </div>
       </header>
 
-      {/* 2. HERO SECTION (Editorial, Asymmetric Grid with Search Transformation) */}
+      <main className="flex-1">
+        {/* 2. HERO SECTION (Editorial, Asymmetric Grid with Search Transformation) */}
       <section className="px-6 py-12 lg:py-20 lg:px-24 max-w-7xl mx-auto w-full transition-all duration-700">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           
@@ -720,6 +740,7 @@ export default function Page() {
           </div>
         </ScrollAnimate>
       </section>
+      </main>
 
       {/* 7. FOOTER */}
       <footer className="bg-neutral-950 text-neutral-400 py-16 px-6 lg:px-24 border-t border-neutral-900">
