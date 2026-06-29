@@ -38,7 +38,8 @@ const GIGS_DATA = [
     imageBg: "bg-gradient-to-tr from-yellow-700 via-yellow-600 to-amber-900",
     avatar: "TO",
     icon: Code,
-    skills: ["React", "Next.js", "Tailwind", "SEO"]
+    skills: ["React", "Next.js", "Tailwind", "SEO"],
+    rank: "Gold Pro"
   },
   {
     id: 2,
@@ -52,7 +53,8 @@ const GIGS_DATA = [
     imageBg: "bg-gradient-to-tr from-amber-700 via-amber-800 to-yellow-900",
     avatar: "CE",
     icon: Scissors,
-    skills: ["Traditional", "Modern Fit", "Embroidery"]
+    skills: ["Traditional", "Modern Fit", "Embroidery"],
+    rank: "Silver"
   },
   {
     id: 3,
@@ -66,7 +68,8 @@ const GIGS_DATA = [
     imageBg: "bg-gradient-to-tr from-yellow-950 via-yellow-800 to-amber-700",
     avatar: "AM",
     icon: Camera,
-    skills: ["Retouching", "Outdoor", "Event Portrait"]
+    skills: ["Retouching", "Outdoor", "Event Portrait"],
+    rank: "Gold Pro"
   },
   {
     id: 4,
@@ -80,7 +83,8 @@ const GIGS_DATA = [
     imageBg: "bg-gradient-to-tr from-amber-900 via-yellow-700 to-yellow-600",
     avatar: "BS",
     icon: Sparkles,
-    skills: ["Bridal Glam", "Natural Hair", "Makeup"]
+    skills: ["Bridal Glam", "Natural Hair", "Makeup"],
+    rank: "Bronze"
   },
   {
     id: 5,
@@ -94,7 +98,8 @@ const GIGS_DATA = [
     imageBg: "bg-gradient-to-tr from-zinc-800 via-yellow-900 to-zinc-950",
     avatar: "EK",
     icon: Code,
-    skills: ["Hardware Repair", "OS Install", "Optimization"]
+    skills: ["Hardware Repair", "OS Install", "Optimization"],
+    rank: "Bronze"
   },
   {
     id: 6,
@@ -108,7 +113,8 @@ const GIGS_DATA = [
     imageBg: "bg-gradient-to-tr from-yellow-800 via-amber-950 to-yellow-700",
     avatar: "OS",
     icon: BookOpen,
-    skills: ["Calculus", "Physics", "Exam Prep"]
+    skills: ["Calculus", "Physics", "Exam Prep"],
+    rank: "Silver"
   }
 ];
 
@@ -534,8 +540,19 @@ export default function Page() {
                               {gig.avatar}
                             </div>
                             <div>
-                              <h4 className="text-sm font-bold text-foreground">{gig.name}</h4>
-                              <p className="text-[10px] text-neutral-400 flex items-center gap-1">
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-sm font-bold text-foreground">{gig.name}</h4>
+                                <span className={`text-[8px] font-bold px-1.5 py-0.5 border ${
+                                  gig.rank === "Gold Pro"
+                                    ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                    : gig.rank === "Silver"
+                                    ? "bg-slate-500/10 text-slate-500 border-slate-500/20"
+                                    : "bg-orange-500/10 text-orange-600 border-orange-500/20"
+                                }`}>
+                                  {gig.rank}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-neutral-400 flex items-center gap-1 mt-0.5">
                                 <MapPin className="h-3 w-3 shrink-0 text-primary" />
                                 {gig.school}
                               </p>

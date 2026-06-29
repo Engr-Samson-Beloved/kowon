@@ -39,6 +39,8 @@ const INITIAL_PITCHES = [
 
 export default function ArtisanDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<"showcase" | "pitches">("showcase");
+  const [hasSubscription, setHasSubscription] = useState(false);
+  const [artisanRank, setArtisanRank] = useState<"Bronze" | "Gold Pro">("Bronze");
   const [gigs, setGigs] = useState(INITIAL_ARTISAN_GIGS);
   const [pitches] = useState(INITIAL_PITCHES);
   
@@ -222,6 +224,86 @@ export default function ArtisanDashboard() {
                 </p>
               </div>
             )}
+          </div>
+
+          {/* Leveling & Subscription Booster */}
+          <div className="border border-border bg-card p-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-bold">
+                Artisan Rank & Subscription
+              </span>
+              <span className={`text-[9px] uppercase font-bold px-2 py-0.5 border ${
+                artisanRank === "Gold Pro" 
+                  ? "bg-amber-500/10 text-amber-600 border-amber-500/20 animate-pulse" 
+                  : "bg-orange-500/10 text-orange-600 border-orange-500/20"
+              }`}>
+                {artisanRank} Badge
+              </span>
+            </div>
+
+            <div className="space-y-4">
+              {artisanRank === "Bronze" ? (
+                <>
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-semibold text-neutral-400">Path to Silver Badge:</h4>
+                    <div className="text-[11px] space-y-1 text-neutral-500">
+                      <div className="flex justify-between">
+                        <span>Completed Jobs</span>
+                        <span className="font-semibold text-foreground">2 / 5</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Rating Average</span>
+                        <span className="font-semibold text-foreground">4.8 / 4.5</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-border pt-4 space-y-3">
+                    <div className="bg-primary/5 border border-primary/20 p-4 space-y-2">
+                      <h4 className="text-xs font-bold text-primary flex items-center gap-1.5">
+                        <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                        KÓ WON Elite Upgrade
+                      </h4>
+                      <p className="text-[10px] text-neutral-500 leading-normal font-light">
+                        Unlock instant **Gold Pro** badge, priority visibility, and commission drop (2% escrow fees instead of 5%) for only ₦1,500/month.
+                      </p>
+                    </div>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setHasSubscription(true);
+                        setArtisanRank("Gold Pro");
+                      }}
+                      className="w-full bg-primary text-primary-foreground text-xs uppercase tracking-wider font-bold py-2.5 hover:bg-foreground hover:text-background transition-colors"
+                    >
+                      Subscribe & Boost Rank
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-3">
+                  <div className="bg-amber-500/5 border border-amber-500/20 p-4 space-y-2">
+                    <h4 className="text-xs font-bold text-amber-600 flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                      KÓ WON Elite Active
+                    </h4>
+                    <p className="text-[10px] text-neutral-500 leading-normal font-light">
+                      Your portfolio matches Level 3 visibility checks. Client search placement is boosted by 2.5x with lowered escrow processing fees.
+                    </p>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setHasSubscription(false);
+                      setArtisanRank("Bronze");
+                    }}
+                    className="w-full border border-border hover:border-red-500 hover:text-red-500 text-xs uppercase tracking-wider font-semibold py-2.5 transition-colors"
+                  >
+                    Cancel Subscription
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Quick Tips */}
