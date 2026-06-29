@@ -210,6 +210,12 @@ export default function ClientDashboard() {
             </div>
             <ThemeToggle />
             <Link 
+              href="/dashboard/inbox" 
+              className="border border-border hover:border-foreground text-xs font-semibold uppercase tracking-wider px-4 py-2 transition-colors"
+            >
+              Inbox
+            </Link>
+            <Link 
               href="/dashboard/artisan" 
               className="border border-border hover:border-foreground text-xs font-semibold uppercase tracking-wider px-4 py-2 transition-colors"
             >
