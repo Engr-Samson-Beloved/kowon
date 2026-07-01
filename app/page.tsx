@@ -220,8 +220,8 @@ export default function Page() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium tracking-wide">
-            <a href="#marketplace" className="hover:text-primary transition-colors">The Showcase</a>
-            <a href="#marketplace" className="hover:text-primary transition-colors">The Exchange</a>
+            <Link href="/marketplace?tab=showcase" className="hover:text-primary transition-colors">The Showcase</Link>
+            <Link href="/marketplace?tab=exchange" className="hover:text-primary transition-colors">The Exchange</Link>
             <a href="#how-it-works" className="hover:text-primary transition-colors">Process</a>
             <a href="#value" className="hover:text-primary transition-colors">Value</a>
           </nav>
