@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { 
@@ -164,7 +164,7 @@ const PROJECTS_DATA = [
   }
 ];
 
-export default function MarketplacePage() {
+function MarketplaceContent() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") === "exchange" ? "exchange" : "showcase";
   
@@ -660,5 +660,17 @@ export default function MarketplacePage() {
       )}
 
     </div>
+  );
+}
+
+export default function MarketplacePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <p className="text-xs uppercase tracking-wider text-neutral-400">Loading KÓ WON Marketplace...</p>
+      </div>
+    }>
+      <MarketplaceContent />
+    </Suspense>
   );
 }
