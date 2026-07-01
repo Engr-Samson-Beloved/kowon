@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/theme-toggle";
+import Logo from "@/components/logo";
 import { 
   ArrowLeft, 
   User, 
@@ -134,10 +135,13 @@ export default function SignupPage() {
         <div className="hidden lg:flex lg:col-span-5 bg-secondary text-secondary-foreground p-12 flex-col justify-between relative overflow-hidden">
           <div className="absolute top-0 right-0 h-96 w-96 border-b border-l border-primary/20 rounded-bl-full z-0" />
           
-          <div className="z-10">
-            <span className="font-serif text-3xl font-bold tracking-widest text-secondary-foreground block">
-              KÓ WON
-            </span>
+          <div className="z-10 space-y-1">
+            <div className="flex items-center gap-2.5">
+              <Logo size={32} />
+              <span className="font-serif text-3xl font-bold tracking-widest text-secondary-foreground block">
+                KÓ WON
+              </span>
+            </div>
             <span className="text-[10px] uppercase tracking-widest text-primary font-bold">
               Affordable Skills • Endless Wealth
             </span>
@@ -195,9 +199,12 @@ export default function SignupPage() {
             
             {/* Header */}
             <div className="space-y-2">
-              <span className="font-serif text-3xl lg:hidden font-bold tracking-widest text-foreground block mb-4">
-                KÓ WON
-              </span>
+              <div className="flex items-center gap-2.5 lg:hidden mb-4">
+                <Logo size={28} />
+                <span className="font-serif text-3xl font-bold tracking-widest text-foreground block">
+                  KÓ WON
+                </span>
+              </div>
               <h1 className="font-serif text-3xl font-light text-foreground">Create Account</h1>
               <p className="text-sm text-neutral-500 font-light">
                 Already registered?{" "}

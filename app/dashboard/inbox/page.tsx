@@ -22,6 +22,7 @@ import {
   Code
 } from "lucide-react";
 import ThemeToggle from "@/components/theme-toggle";
+import Logo from "@/components/logo";
 
 // Mock Conversation Lists
 const CONVERSATIONS = [
@@ -165,7 +166,8 @@ export default function InboxPage() {
           <Link href="/" className="hover:text-primary transition-colors text-neutral-400">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
+            <Logo size={28} />
             <span className="font-serif text-2xl font-bold tracking-widest">KÓ WON</span>
             <span className="bg-primary/20 text-primary border border-primary/30 text-[9px] uppercase font-bold px-2 py-0.5 mt-0.5 tracking-wider">
               Inbox Workspace

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import ThemeToggle from "@/components/theme-toggle";
 import ScrollAnimate from "@/components/scroll-animate";
+import Logo from "@/components/logo";
 import { 
   Search, 
   MapPin, 
@@ -205,13 +206,16 @@ export default function Page() {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border px-6 py-4 lg:px-24">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           {/* Brand Logotype */}
-          <div className="flex items-center gap-2">
-            <span className="font-serif text-3xl font-bold tracking-widest text-foreground hover:opacity-85 cursor-pointer">
-              KÓ WON
-            </span>
-            <span className="bg-primary/20 text-primary border border-primary/30 text-[10px] tracking-wider uppercase font-bold px-2 py-0.5 mt-1 font-sans">
-              It's Affordable
-            </span>
+          <div className="flex items-center gap-3">
+            <Logo size={36} />
+            <div className="flex items-center gap-2">
+              <span className="font-serif text-3xl font-bold tracking-widest text-foreground hover:opacity-85 cursor-pointer">
+                KÓ WON
+              </span>
+              <span className="bg-primary/20 text-primary border border-primary/30 text-[10px] tracking-wider uppercase font-bold px-2 py-0.5 mt-1 font-sans">
+                It's Affordable
+              </span>
+            </div>
           </div>
 
           {/* Desktop Navigation Links */}
@@ -764,7 +768,10 @@ export default function Page() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
           
           <div className="space-y-4">
-            <h3 className="font-serif text-2xl text-white font-bold tracking-widest">KÓ WON</h3>
+            <div className="flex items-center gap-2.5">
+              <Logo size={32} />
+              <h3 className="font-serif text-2xl text-white font-bold tracking-widest">KÓ WON</h3>
+            </div>
             <p className="text-xs text-neutral-500 leading-relaxed">
               Nigeria's premier student-powered service marketplace. Enabling entrepreneurship, craft visibility, and affordable local execution.
             </p>

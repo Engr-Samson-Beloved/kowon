@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/theme-toggle";
+import Logo from "@/components/logo";
 import { 
   ArrowLeft, 
   Mail, 
@@ -66,10 +67,13 @@ export default function LoginPage() {
           <div className="absolute bottom-0 left-0 h-64 w-64 border-t border-r border-primary/10 rounded-tr-full z-0" />
 
           {/* Top: Logotype */}
-          <div className="z-10">
-            <span className="font-serif text-3xl font-bold tracking-widest text-secondary-foreground block">
-              KÓ WON
-            </span>
+          <div className="z-10 space-y-1">
+            <div className="flex items-center gap-2.5">
+              <Logo size={32} />
+              <span className="font-serif text-3xl font-bold tracking-widest text-secondary-foreground block">
+                KÓ WON
+              </span>
+            </div>
             <span className="text-[10px] uppercase tracking-widest text-primary font-bold">
               Affordable Skills • Endless Wealth
             </span>
@@ -104,9 +108,12 @@ export default function LoginPage() {
             
             {/* Header */}
             <div className="space-y-2">
-              <span className="font-serif text-3xl lg:hidden font-bold tracking-widest text-foreground block mb-4">
-                KÓ WON
-              </span>
+              <div className="flex items-center gap-2.5 lg:hidden mb-4">
+                <Logo size={28} />
+                <span className="font-serif text-3xl font-bold tracking-widest text-foreground block">
+                  KÓ WON
+                </span>
+              </div>
               <h1 className="font-serif text-3xl font-light text-foreground">Welcome Back</h1>
               <p className="text-sm text-neutral-500 font-light">
                 New to the platform?{" "}
