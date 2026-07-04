@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import ThemeToggle from "@/components/theme-toggle";
 import Logo from "@/components/logo";
+import { supabase } from "@/components/supabase-client";
 
 // Mock Showcase Gigs Data
 const GIGS_DATA = [
@@ -179,6 +180,24 @@ function MarketplaceContent() {
   const [maxPrice, setMaxPrice] = useState(150000);
   const [showFilters, setShowFilters] = useState(false);
 
+  const [user, setUser] = useState<any>(null);
+  const [loadingSession, setLoadingSession] = useState(true);
+
+  useEffect(() => {
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setLoadingSession(false);
+    };
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   // Modal states
   const [selectedGigDetail, setSelectedGigDetail] = useState<typeof GIGS_DATA[0] | null>(null);
   const [selectedProjectForBid, setSelectedProjectForBid] = useState<typeof PROJECTS_DATA[0] | null>(null);
@@ -240,8 +259,8 @@ function MarketplaceContent() {
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       
       {/* 1. HEADER */}
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border px-6 py-4 lg:px-24">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border px-4 sm:px-6 lg:px-8 py-4 w-full">
+        <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-4">
             <Link href="/" className="hover:text-primary transition-colors text-neutral-400">
               <ArrowLeft className="h-5 w-5" />
@@ -254,18 +273,39 @@ function MarketplaceContent() {
 
           <div className="flex items-center gap-6">
             <ThemeToggle />
-            <Link 
-              href="/auth/signup" 
-              className="bg-primary text-primary-foreground font-semibold uppercase text-[10px] tracking-wider px-5 py-2.5 hover:bg-foreground hover:text-background transition-all duration-300"
-            >
-              Post a Project
-            </Link>
+            {loadingSession ? (
+              <span className="text-[10px] uppercase font-semibold text-neutral-500 tracking-wider">Loading...</span>
+            ) : user ? (
+              <div className="flex items-center gap-5">
+                <Link href="/auth/callback" className="text-xs uppercase font-semibold tracking-wider hover:text-primary transition-colors">
+                  Dashboard
+                </Link>
+                <Link href="/dashboard/inbox" className="text-xs uppercase font-semibold tracking-wider hover:text-primary transition-colors">
+                  Inbox
+                </Link>
+                <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs uppercase" title={user.email}>
+                  {user.user_metadata?.full_name?.substring(0, 2) || user.email?.substring(0, 2) || "U"}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-5">
+                <Link href="/auth/login" className="text-xs uppercase font-semibold tracking-wider hover:text-primary transition-colors">
+                  Sign In
+                </Link>
+                <Link 
+                  href="/auth/signup" 
+                  className="bg-primary text-primary-foreground font-semibold uppercase text-[10px] tracking-wider px-5 py-2.5 hover:bg-foreground hover:text-background transition-all duration-300"
+                >
+                  Join as Talent
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
       {/* 2. SUB-HERO SEARCH & TABS PANELS */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-10 lg:px-24 flex flex-col gap-8">
+      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-8">
         
         {/* Search controls bar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border border-border bg-card p-6">
@@ -391,31 +431,55 @@ function MarketplaceContent() {
             {/* Personalized Greeting (showcase.png style) */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
-                <h1 className="font-serif text-3xl md:text-4xl font-light text-foreground">Welcome back, Samson Olabanji</h1>
-                <p className="text-xs text-neutral-400 mt-1 font-sans">Based on what you might be looking for on Nigeria's campuses.</p>
+                <h1 className="font-serif text-3xl md:text-4xl font-light text-foreground">
+                  {user ? `Welcome back, ${user.user_metadata?.full_name || "Client"}` : "Welcome to KÓ WON"}
+                </h1>
+                <p className="text-xs text-neutral-400 mt-1 font-sans">
+                  {user ? "Based on what you might be looking for on Nigeria's campuses." : "Nigeria's premier marketplace for elite student software dev, tailoring, and photography."}
+                </p>
               </div>
             </div>
 
-            {/* Recommended Brief Prompt Banner */}
-            <div className="bg-card border border-border p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-                  <Briefcase className="h-6 w-6" />
+            {/* Dynamic Brief or Signup Promotion Banner */}
+            {user ? (
+              <div className="bg-card border border-border p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                    <Briefcase className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm">Post a project brief</h3>
+                    <p className="text-xs text-neutral-400 mt-0.5 font-sans">Get tailored offers and pitches from verified campus talents for your custom needs.</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-sm">Post a project brief</h3>
-                  <p className="text-xs text-neutral-400 mt-0.5 font-sans">Get tailored offers and pitches from verified campus talents for your custom needs.</p>
-                </div>
+                <button 
+                  onClick={() => {
+                    setActiveTab("exchange");
+                  }}
+                  className="border border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-6 py-2.5 text-xs uppercase tracking-wider transition-all duration-300 cursor-pointer"
+                >
+                  Get started
+                </button>
               </div>
-              <button 
-                onClick={() => {
-                  setActiveTab("exchange");
-                }}
-                className="border border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-6 py-2.5 text-xs uppercase tracking-wider transition-all duration-300 cursor-pointer"
-              >
-                Get started
-              </button>
-            </div>
+            ) : (
+              <div className="bg-card border border-border p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                    <Sparkles className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm">Join the KÓ WON Campus Network</h3>
+                    <p className="text-xs text-neutral-400 mt-0.5 font-sans">Are you a talented student freelancer? Create your profile, showcase crafts, and find clients commission-free.</p>
+                  </div>
+                </div>
+                <Link 
+                  href="/auth/signup"
+                  className="border border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-6 py-2.5 text-xs uppercase tracking-wider transition-all duration-300 inline-block text-center cursor-pointer"
+                >
+                  Register Now
+                </Link>
+              </div>
+            )}
 
             {/* Showcase Grid Columns */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
