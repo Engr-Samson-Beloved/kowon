@@ -260,7 +260,7 @@ export default function Page() {
                 : "max-h-12 opacity-100 transform translate-y-0"
             }`}>
               <div className="inline-flex items-center gap-2 border-l-2 border-primary pl-4 py-0.5">
-                <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold">
+                <span className="text-xs uppercase tracking-widest text-neutral-500 dark:text-neutral-400 font-bold">
                   Student Freelance & Craft Ecosystem
                 </span>
               </div>
@@ -330,17 +330,17 @@ export default function Page() {
             }`}>
               <div>
                 <p className="text-2xl font-serif text-primary font-bold">12+</p>
-                <p className="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Campuses</p>
+                <p className="text-xs text-neutral-700 dark:text-neutral-400 uppercase tracking-wider font-semibold">Campuses</p>
               </div>
               <div className="border-l border-border h-10 my-auto"></div>
               <div>
                 <p className="text-2xl font-serif text-primary font-bold">4.9/5</p>
-                <p className="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Average Rating</p>
+                <p className="text-xs text-neutral-700 dark:text-neutral-400 uppercase tracking-wider font-semibold">Average Rating</p>
               </div>
               <div className="border-l border-border h-10 my-auto"></div>
               <div>
                 <p className="text-2xl font-serif text-primary font-bold">₦40M+</p>
-                <p className="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Student Earnings</p>
+                <p className="text-xs text-neutral-700 dark:text-neutral-400 uppercase tracking-wider font-semibold">Student Earnings</p>
               </div>
             </div>
 
@@ -510,7 +510,7 @@ export default function Page() {
                 className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider shrink-0 transition-all ${
                   selectedCategory === cat
                     ? "border-b-2 border-primary text-foreground font-bold"
-                    : "text-neutral-400 hover:text-foreground"
+                    : "text-neutral-500 dark:text-neutral-400 hover:text-foreground"
                 }`}
               >
                 {cat}
@@ -548,15 +548,15 @@ export default function Page() {
                                 <h4 className="text-sm font-bold text-foreground">{gig.name}</h4>
                                 <span className={`text-[8px] font-bold px-1.5 py-0.5 border ${
                                   gig.rank === "Gold Pro"
-                                    ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                    ? "bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/20"
                                     : gig.rank === "Silver"
-                                    ? "bg-slate-500/10 text-slate-500 border-slate-500/20"
-                                    : "bg-orange-500/10 text-orange-600 border-orange-500/20"
+                                    ? "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20"
+                                    : "bg-orange-500/10 text-orange-800 dark:text-orange-400 border-orange-500/20"
                                 }`}>
                                   {gig.rank}
                                 </span>
                               </div>
-                              <p className="text-[10px] text-neutral-400 flex items-center gap-1 mt-0.5">
+                              <p className="text-[10px] text-neutral-500 dark:text-neutral-400 flex items-center gap-1 mt-0.5">
                                 <MapPin className="h-3 w-3 shrink-0 text-primary" />
                                 {gig.school}
                               </p>
@@ -772,7 +772,7 @@ export default function Page() {
               <Logo size={32} />
               <h3 className="font-serif text-2xl text-white font-bold tracking-widest">KÓ WON</h3>
             </div>
-            <p className="text-xs text-neutral-500 leading-relaxed">
+            <p className="text-xs text-neutral-400 leading-relaxed">
               Nigeria's premier student-powered service marketplace. Enabling entrepreneurship, craft visibility, and affordable local execution.
             </p>
             <div className="text-[10px] text-primary bg-primary/10 border border-primary/20 inline-block px-2 py-0.5 font-bold uppercase tracking-wider">
@@ -802,18 +802,18 @@ export default function Page() {
 
           <div className="space-y-4">
             <h4 className="text-white text-xs font-bold uppercase tracking-wider">Mission Statement</h4>
-            <p className="text-xs text-neutral-500 leading-relaxed italic">
+            <p className="text-xs text-neutral-400 leading-relaxed italic">
               "To bridge the gap between talented Nigerian students and customers by providing a trusted, secure, and user-friendly platform that promotes employment, entrepreneurship, and affordability."
             </p>
           </div>
 
         </div>
 
-        <div className="max-w-7xl mx-auto border-t border-neutral-900 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-neutral-600">
+        <div className="max-w-7xl mx-auto border-t border-neutral-900 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-neutral-400">
           <p>© {new Date().getFullYear()} KÓ WON. All rights reserved across Nigeria and Africa.</p>
           <p className="flex gap-4 mt-4 md:mt-0">
-            <a href="#" className="hover:text-neutral-400">Terms of Use</a>
-            <a href="#" className="hover:text-neutral-400">Privacy Policy</a>
+            <a href="#" className="hover:text-white transition-colors">Terms of Use</a>
+            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
           </p>
         </div>
       </footer>

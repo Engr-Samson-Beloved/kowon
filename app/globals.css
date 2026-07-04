@@ -5,7 +5,7 @@
   --background: oklch(0.98 0.01 75);             /* Warm Champagne `#FDFBF7` */
   --foreground: oklch(0.14 0.01 260);            /* Deep Obsidian `#0F0F10` */
   
-  --primary: oklch(0.76 0.16 85);                /* Imperial Gold `#D4AF37` */
+  --primary: oklch(0.48 0.11 85);                /* Deeper Gold/Bronze for Contrast */
   --primary-foreground: oklch(0.14 0.01 260);     /* Deep Obsidian Text on Gold */
   
   --secondary: oklch(0.25 0.04 150);              /* Sage Forest `#1C352D` */
