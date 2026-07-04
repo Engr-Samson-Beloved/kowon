@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/theme-toggle";
 import Logo from "@/components/logo";
+import { supabase } from "@/components/supabase-client";
 import { 
   ArrowLeft, 
   User, 
@@ -63,6 +64,7 @@ export default function SignupPage() {
   const [verificationCode, setVerificationCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   // Email validation warning
   const showEmailWarning = role === "student" && email && !email.endsWith(".edu.ng") && !email.endsWith(".edu");
@@ -81,37 +83,87 @@ export default function SignupPage() {
 
   const strengthScore = getPasswordStrength();
 
-  const handleNextStep = (e: React.FormEvent) => {
+  const handleNextStep = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName || !email || !password) return;
     if (role === "student" && (!school || !skill)) return;
     if (role === "client" && !companyName) return;
 
     setIsLoading(true);
-    // Simulate sending OTP verification code
-    setTimeout(() => {
+    setErrorMsg("");
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+          role: role,
+          school: role === "student" ? school : null,
+          skill: role === "student" ? skill : null,
+          company_name: role === "client" ? companyName : null,
+        }
+      }
+    });
+
+    if (error) {
+      setErrorMsg(error.message);
       setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(false);
+    if (data.session) {
+      // Auto-confirm configuration is enabled on Supabase
+      setRegistrationSuccess(true);
+      setTimeout(() => {
+        router.push(role === "student" ? "/dashboard/artisan" : "/dashboard/client");
+      }, 1500);
+    } else {
+      // Proceed to verification code step
       setStep(2);
-    }, 1200);
+    }
   };
 
-  const handleVerifyOTP = (e: React.FormEvent) => {
+  const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!verificationCode) return;
 
     setIsLoading(true);
-    // Simulate OTP verification
-    setTimeout(() => {
+    setErrorMsg("");
+
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token: verificationCode,
+      type: "signup",
+    });
+
+    if (error) {
+      setErrorMsg(error.message);
       setIsLoading(false);
-      setRegistrationSuccess(true);
-      setTimeout(() => {
-        if (role === "student") {
-          router.push("/dashboard/artisan");
-        } else {
-          router.push("/dashboard/client");
-        }
-      }, 1500);
+      return;
+    }
+
+    setIsLoading(false);
+    setRegistrationSuccess(true);
+    setTimeout(() => {
+      router.push(role === "student" ? "/dashboard/artisan" : "/dashboard/client");
     }, 1500);
+  };
+
+  const handleGoogleSignUp = async () => {
+    setIsLoading(true);
+    setErrorMsg("");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      setErrorMsg(error.message);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -230,6 +282,13 @@ export default function SignupPage() {
               </div>
             ) : step === 1 ? (
               <form onSubmit={handleNextStep} className="space-y-6">
+                
+                {errorMsg && (
+                  <div className="bg-red-500/10 border border-red-500/20 p-4 text-xs text-red-600 font-semibold flex items-center gap-2">
+                    <ShieldAlert className="h-4 w-4 shrink-0" />
+                    <span>{errorMsg}</span>
+                  </div>
+                )}
                 
                 {/* Role Switcher */}
                 <div className="space-y-2">
@@ -457,9 +516,36 @@ export default function SignupPage() {
                 </button>
 
               </form>
+
+              {/* Social Logins */}
+              <div className="space-y-4 border-t border-border pt-6 mt-6">
+                <span className="text-center block text-[10px] uppercase tracking-wider text-neutral-400">
+                  Institutional SSO Access
+                </span>
+                <div className="grid grid-cols-2 gap-4">
+                  <button 
+                    type="button"
+                    onClick={handleGoogleSignUp}
+                    disabled={isLoading}
+                    className="border border-border bg-background hover:bg-neutral-50 dark:hover:bg-neutral-900 py-2.5 text-xs font-semibold uppercase tracking-wider text-center text-foreground transition-all duration-300 disabled:opacity-50"
+                  >
+                    Google Workspace
+                  </button>
+                  <button className="border border-border bg-background hover:bg-neutral-50 dark:hover:bg-neutral-900 py-2.5 text-xs font-semibold uppercase tracking-wider text-center text-foreground transition-all duration-300 cursor-not-allowed opacity-50" disabled>
+                    Edu ID Portal
+                  </button>
+                </div>
+              </div>
             ) : (
               /* STEP 2: VERIFICATION OTP CODE */
               <form onSubmit={handleVerifyOTP} className="space-y-6 animate-fade-in">
+                
+                {errorMsg && (
+                  <div className="bg-red-500/10 border border-red-500/20 p-4 text-xs text-red-600 font-semibold flex items-center gap-2">
+                    <ShieldAlert className="h-4 w-4 shrink-0" />
+                    <span>{errorMsg}</span>
+                  </div>
+                )}
                 <div className="space-y-2 border border-primary/20 bg-primary/5 p-4 text-xs font-light text-neutral-600 dark:text-neutral-400">
                   <p>
                     We have sent a verification code to your email <strong>{email}</strong>. 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/theme-toggle";
 import Logo from "@/components/logo";
+import { supabase } from "@/components/supabase-client";
 import { 
   ArrowLeft, 
   Mail, 
@@ -23,24 +24,51 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
     
     setIsLoading(true);
-    // Mock authentication delay
-    setTimeout(() => {
+    setErrorMsg("");
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setErrorMsg(error.message);
       setIsLoading(false);
-      setLoginSuccess(true);
-      setTimeout(() => {
-        if (email.toLowerCase().includes("client") || email.toLowerCase().includes("work") || email.toLowerCase().includes("company")) {
-          router.push("/dashboard/client");
-        } else {
-          router.push("/dashboard/artisan");
-        }
-      }, 1000);
-    }, 1200);
+      return;
+    }
+
+    setIsLoading(false);
+    setLoginSuccess(true);
+    setTimeout(() => {
+      const userRole = data.user?.user_metadata?.role || "student";
+      if (userRole === "client") {
+        router.push("/dashboard/client");
+      } else {
+        router.push("/dashboard/artisan");
+      }
+    }, 1000);
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    setErrorMsg("");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      setErrorMsg(error.message);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -136,6 +164,13 @@ export default function LoginPage() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 
+                {errorMsg && (
+                  <div className="bg-red-500/10 border border-red-500/20 p-4 text-xs text-red-600 font-semibold flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>{errorMsg}</span>
+                  </div>
+                )}
+                
                 {/* Email Input */}
                 <div className="space-y-1.5">
                   <label htmlFor="email" className="text-xs uppercase tracking-wider text-neutral-500 font-semibold">
@@ -223,10 +258,15 @@ export default function LoginPage() {
                 Institutional SSO Access
               </span>
               <div className="grid grid-cols-2 gap-4">
-                <button className="border border-border bg-background hover:bg-neutral-50 dark:hover:bg-neutral-900 py-2.5 text-xs font-semibold uppercase tracking-wider text-center text-foreground transition-all duration-300">
+                <button 
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  disabled={isLoading}
+                  className="border border-border bg-background hover:bg-neutral-50 dark:hover:bg-neutral-900 py-2.5 text-xs font-semibold uppercase tracking-wider text-center text-foreground transition-all duration-300 disabled:opacity-50"
+                >
                   Google Workspace
                 </button>
-                <button className="border border-border bg-background hover:bg-neutral-50 dark:hover:bg-neutral-900 py-2.5 text-xs font-semibold uppercase tracking-wider text-center text-foreground transition-all duration-300">
+                <button className="border border-border bg-background hover:bg-neutral-50 dark:hover:bg-neutral-900 py-2.5 text-xs font-semibold uppercase tracking-wider text-center text-foreground transition-all duration-300 cursor-not-allowed opacity-50" disabled>
                   Edu ID Portal
                 </button>
               </div>
