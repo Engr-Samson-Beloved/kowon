@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import ThemeToggle from "@/components/theme-toggle";
 import ScrollAnimate from "@/components/scroll-animate";
+import Navbar from "@/components/navbar";
 import { 
   Search, 
   MapPin, 
@@ -245,46 +246,8 @@ export default function Page() {
         }}
       />
 
-      {/* 1. HEADER (Top Glassmorphic Navigation) */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border px-6 py-4 lg:px-24">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          {/* Brand Logotype */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <span className="font-serif text-3xl font-bold tracking-widest text-foreground hover:opacity-85 cursor-pointer">
-                KÓ WON
-              </span>
-              <span className="bg-primary/20 text-primary border border-primary/30 text-[10px] tracking-wider uppercase font-bold px-2 py-0.5 mt-1 font-sans">
-                It's Affordable
-              </span>
-            </div>
-          </div>
-
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium tracking-wide">
-            <Link href="/marketplace?tab=showcase" className="hover:text-primary transition-colors">The Showcase</Link>
-            <Link href="/marketplace?tab=exchange" className="hover:text-primary transition-colors">The Exchange</Link>
-            <a href="#how-it-works" className="hover:text-primary transition-colors">Process</a>
-            <a href="#value" className="hover:text-primary transition-colors">Value</a>
-          </nav>
-
-          {/* Action CTAs */}
-          <div className="flex items-center gap-6">
-            <Link 
-              href="/auth/login"
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground hover:text-primary transition-colors"
-            >
-              Log In
-            </Link>
-            <Link 
-              href="/auth/signup" 
-              className="bg-primary text-primary-foreground font-semibold uppercase text-xs tracking-wider px-5 py-2.5 hover:bg-foreground hover:text-background transition-all duration-300"
-            >
-              Join as Talent
-            </Link>
-          </div>
-        </div>
-      </header>
+      {/* 1. HEADER (Consistent Premium Navigation) */}
+      <Navbar />
 
       <main className="flex-1">
         {/* 2. HERO SECTION (Editorial, Asymmetric Grid with Search Transformation) */}

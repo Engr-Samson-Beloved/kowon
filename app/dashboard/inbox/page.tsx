@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { 
-  ArrowLeft, 
   Send, 
   Paperclip, 
   MapPin, 
@@ -21,8 +20,7 @@ import {
   Scissors,
   Code
 } from "lucide-react";
-import ThemeToggle from "@/components/theme-toggle";
-import Logo from "@/components/logo";
+import Navbar from "@/components/navbar";
 
 // Mock Conversation Lists
 const CONVERSATIONS = [
@@ -38,7 +36,7 @@ const CONVERSATIONS = [
     category: "Code & Dev",
     categoryIcon: Code,
     lockedFunds: 45000,
-    orderStatus: "Review Pending" // In Progress | Review Pending | Released | Revision Requested
+    orderStatus: "Review Pending" 
   },
   {
     id: 2,
@@ -103,7 +101,6 @@ export default function InboxPage() {
 
     setMessages([...messages, newMsg]);
     
-    // Update last message in conversation list
     setConversations(prev => prev.map(c => {
       if (c.id === activeConv.id) {
         return {
@@ -118,7 +115,6 @@ export default function InboxPage() {
     setTypedMessage("");
   };
 
-  // Simulate Escrow Operations
   const handleUpdateOrderStatus = (newStatus: "Released" | "Revision Requested" | "Review Pending") => {
     setConversations(prev => prev.map(c => {
       if (c.id === activeConv.id) {
@@ -131,7 +127,6 @@ export default function InboxPage() {
       return c;
     }));
 
-    // Post System message in chat
     const systemMsg = {
       id: messages.length + 1,
       sender: "system",
@@ -146,7 +141,6 @@ export default function InboxPage() {
   const handleArtisanSubmit = () => {
     handleUpdateOrderStatus("Review Pending");
     
-    // Simulate attaching lookbook draft
     const newMsg = {
       id: messages.length + 2,
       sender: "artisan",
@@ -160,78 +154,64 @@ export default function InboxPage() {
   return (
     <div className="h-screen bg-background text-foreground flex flex-col font-sans overflow-hidden">
       
-      {/* 1. TOP BAR */}
-      <header className="bg-background border-b border-border px-6 py-4 lg:px-24 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="hover:text-primary transition-colors text-neutral-400">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <div className="flex items-center gap-2.5">
-            <Logo size={28} />
-            <span className="font-serif text-2xl font-bold tracking-widest">KÓ WON</span>
-            <span className="bg-primary/20 text-primary border border-primary/30 text-[9px] uppercase font-bold px-2 py-0.5 mt-0.5 tracking-wider">
-              Inbox Workspace
-            </span>
-          </div>
+      {/* Reusable navbar */}
+      <Navbar />
+
+      {/* Role Switcher Toolbar (Mature borderless toolbar) */}
+      <div className="bg-neutral-900/30 px-6 py-3 border-b border-border/20 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold block font-sans">
+            Inbox Workspace
+          </span>
+          <span className="text-neutral-600">•</span>
+          <span className="text-[10px] text-primary uppercase font-bold font-sans">
+            Current View: {currentRole === "client" ? "Client Ledger" : "Artisan Ledger"}
+          </span>
         </div>
 
-        {/* Role Switcher & Navigation Links */}
-        <div className="flex items-center gap-6">
-          <div className="flex bg-neutral-100 dark:bg-neutral-900 border border-border p-1">
-            <button 
-              onClick={() => setCurrentRole("client")}
-              className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 transition-all ${
-                currentRole === "client" 
-                  ? "bg-foreground text-background dark:bg-white dark:text-black shadow-md" 
-                  : "text-neutral-400 hover:text-foreground"
-              }`}
-            >
-              View as Client
-            </button>
-            <button 
-              onClick={() => setCurrentRole("artisan")}
-              className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 transition-all ${
-                currentRole === "artisan" 
-                  ? "bg-foreground text-background dark:bg-white dark:text-black shadow-md" 
-                  : "text-neutral-400 hover:text-foreground"
-              }`}
-            >
-              View as Artisan
-            </button>
-          </div>
-
-          <ThemeToggle />
-          
-          <Link 
-            href={currentRole === "client" ? "/dashboard/client" : "/dashboard/artisan"}
-            className="hidden md:inline-block border border-border hover:border-foreground text-xs font-semibold uppercase tracking-wider px-4 py-2 transition-all"
+        <div className="flex bg-neutral-900 border border-border/20 p-0.5">
+          <button 
+            onClick={() => setCurrentRole("client")}
+            className={`text-[9px] font-bold uppercase tracking-wider px-3 py-1.5 transition-all cursor-pointer ${
+              currentRole === "client" 
+                ? "bg-primary text-primary-foreground font-bold shadow-md" 
+                : "text-neutral-400 hover:text-foreground"
+            }`}
           >
-            Dashboard
-          </Link>
+            View as Client
+          </button>
+          <button 
+            onClick={() => setCurrentRole("artisan")}
+            className={`text-[9px] font-bold uppercase tracking-wider px-3 py-1.5 transition-all cursor-pointer ${
+              currentRole === "artisan" 
+                ? "bg-primary text-primary-foreground font-bold shadow-md" 
+                : "text-neutral-400 hover:text-foreground"
+            }`}
+          >
+            View as Artisan
+          </button>
         </div>
-      </header>
+      </div>
 
-      {/* 2. THREE-PANEL CORE SYSTEM */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* THREE-PANEL CORE SYSTEM (Borderless layout) */}
+      <div className="flex-1 flex overflow-hidden w-full">
         
-        {/* PANEL A: LEFT RAIL - CONVERSATIONS (Spans 3 columns) */}
-        <div className="w-80 border-r border-border flex flex-col bg-card/40 shrink-0 overflow-y-auto">
-          <div className="p-4 border-b border-border">
-            <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-bold block">
+        {/* PANEL A: LEFT RAIL - CONVERSATIONS (Borderless side listing) */}
+        <div className="w-80 border-r border-border/20 flex flex-col bg-neutral-950 shrink-0 overflow-y-auto">
+          <div className="p-4 border-b border-border/10">
+            <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold block">
               Active Contracts ({conversations.length})
             </span>
           </div>
 
-          <div className="flex-1 divide-y divide-border">
+          <div className="flex-1 divide-y divide-border/10">
             {conversations.map((conv) => {
-              const Icon = conv.categoryIcon;
               const isSelected = conv.id === activeConv.id;
               return (
                 <button
                   key={conv.id}
                   onClick={() => {
                     setActiveConvId(conv.id);
-                    // Reset mock message logs to fit selected project
                     if (conv.id === 2) {
                       setMessages([
                         { id: 1, sender: "client", content: "Hello Chinwe. Let's make the traditional Senator attire customized to these size specifications.", timestamp: "Yesterday" },
@@ -241,35 +221,35 @@ export default function InboxPage() {
                       setMessages(INITIAL_MESSAGES);
                     }
                   }}
-                  className={`w-full text-left p-5 flex flex-col gap-2 transition-all ${
+                  className={`w-full text-left p-5 flex flex-col gap-2 transition-all cursor-pointer ${
                     isSelected 
                       ? "bg-primary/5 border-l-2 border-primary" 
-                      : "hover:bg-neutral-50 dark:hover:bg-neutral-900/30"
+                      : "hover:bg-neutral-900/40"
                   }`}
                 >
                   <div className="flex justify-between items-start w-full">
                     <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-none bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs">
+                      <div className="h-7 w-7 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs">
                         {conv.avatar}
                       </div>
                       <div>
                         <h4 className="text-xs font-bold text-foreground">{conv.name}</h4>
-                        <span className="text-[9px] text-neutral-400 block">{conv.role}</span>
+                        <span className="text-[9px] text-neutral-400 block font-sans">{conv.role}</span>
                       </div>
                     </div>
-                    <span className="text-[9px] text-neutral-400">{conv.timestamp}</span>
+                    <span className="text-[9px] text-neutral-400 font-sans">{conv.timestamp}</span>
                   </div>
 
                   <div className="space-y-1">
                     <h5 className="font-serif text-xs font-semibold text-foreground line-clamp-1">{conv.projectTitle}</h5>
-                    <p className="text-[11px] text-neutral-500 line-clamp-2 leading-snug font-light">
+                    <p className="text-[11px] text-neutral-500 line-clamp-2 leading-snug font-light font-sans">
                       {conv.lastMessage}
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center justify-between pt-1 font-sans">
                     <span className="text-[8px] uppercase tracking-wider text-neutral-400 font-medium">
-                      ₦{conv.lockedFunds.toLocaleString()} In Escrow
+                      ₦{conv.lockedFunds.toLocaleString()} Escrow
                     </span>
                     <span className={`text-[8px] uppercase font-bold px-1.5 py-0.5 border ${
                       conv.orderStatus === "Released"
@@ -287,22 +267,22 @@ export default function InboxPage() {
           </div>
         </div>
 
-        {/* PANEL B: CENTER PANE - CHAT LOG (Spans 6 columns equivalent) */}
+        {/* PANEL B: CENTER PANE - CHAT LOG (Borderless bubbles timeline) */}
         <div className="flex-1 flex flex-col bg-background relative overflow-hidden">
           
           {/* Active Chat Header */}
-          <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-card/20 shrink-0">
+          <div className="px-6 py-4 border-b border-border/10 flex items-center justify-between bg-neutral-900/10 shrink-0">
             <div className="flex items-center gap-3">
               <div>
                 <h3 className="text-sm font-bold text-foreground">{activeConv.name}</h3>
-                <p className="text-[10px] text-neutral-400 flex items-center gap-1">
+                <p className="text-[10px] text-neutral-400 flex items-center gap-1 font-sans">
                   <MapPin className="h-3 w-3 text-primary shrink-0" />
                   {activeConv.school}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold bg-neutral-100 dark:bg-neutral-900 border border-border px-2 py-0.5 text-neutral-500 uppercase tracking-wider">
+              <span className="text-[10px] font-bold bg-neutral-900 border border-border/20 px-2 py-0.5 text-neutral-400 uppercase tracking-wider font-sans">
                 {activeConv.category}
               </span>
             </div>
@@ -313,8 +293,8 @@ export default function InboxPage() {
             {messages.map((msg) => {
               if (msg.sender === "system") {
                 return (
-                  <div key={msg.id} className="flex justify-center my-4">
-                    <div className="bg-primary/5 text-primary border border-primary/20 text-xs font-medium px-4 py-2 text-center max-w-md flex items-center gap-2">
+                  <div key={msg.id} className="flex justify-center my-4 animate-fade-in">
+                    <div className="bg-primary/5 text-primary border border-primary/20 text-xs font-medium px-4 py-2 text-center max-w-md flex items-center gap-2 font-sans">
                       <Sparkles className="h-4 w-4 shrink-0" />
                       <span>{msg.content}</span>
                     </div>
@@ -324,197 +304,142 @@ export default function InboxPage() {
 
               const isOwnMessage = msg.sender === currentRole;
               return (
-                <div key={msg.id} className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}>
+                <div key={msg.id} className={`flex ${isOwnMessage ? "justify-end" : "justify-start"} animate-fade-in`}>
                   <div className={`max-w-md space-y-1 ${isOwnMessage ? "text-right" : "text-left"}`}>
-                    <div className={`p-4 text-xs leading-relaxed ${
+                    <div className={`p-4 text-xs leading-relaxed rounded-lg ${
                       isOwnMessage 
                         ? "bg-foreground text-background dark:bg-white dark:text-black font-medium" 
-                        : "bg-card text-card-foreground border border-border"
+                        : "bg-neutral-900/40 text-foreground border border-border/15"
                     }`}>
                       {msg.content}
 
                       {/* Render Mock Attachment */}
                       {msg.attachment && (
-                        <div className="mt-3 border border-border bg-background p-3 flex items-center gap-3 text-left text-[11px] text-foreground">
+                        <div className="mt-3 border border-border/20 bg-background/50 p-3 flex items-center gap-3 text-left text-[11px] text-foreground font-sans">
                           <ImageIcon className="h-5 w-5 text-primary shrink-0" />
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold truncate">{msg.attachment}</p>
-                            <span className="text-[9px] text-neutral-400 uppercase tracking-wider">Verified Lookbook Proof</span>
+                            <span className="text-[9px] text-neutral-400 uppercase tracking-wider">Milestone Deliverable Proof</span>
                           </div>
                           <span className="text-[9px] font-bold text-green-600 bg-green-500/10 border border-green-500/20 px-2 py-0.5 uppercase shrink-0">
-                            Approved
+                            Verified
                           </span>
                         </div>
                       )}
                     </div>
-                    <span className="text-[9px] text-neutral-400 px-1">{msg.timestamp}</span>
+                    <span className="text-[9px] text-neutral-400 px-1 font-sans">{msg.timestamp}</span>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Bottom Chat Input Form */}
-          <form onSubmit={handleSendMessage} className="p-4 border-t border-border bg-card/20 flex gap-3 shrink-0">
-            <button 
-              type="button" 
-              className="bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200 dark:hover:bg-neutral-800 border border-border p-3 text-neutral-400 hover:text-foreground transition-colors shrink-0"
-              title="Attach lookbook screenshot"
-            >
+          {/* Typing Action Bar */}
+          <form onSubmit={handleSendMessage} className="p-4 bg-neutral-950 border-t border-border/20 flex gap-3 shrink-0">
+            <button type="button" className="p-2.5 bg-neutral-900 text-neutral-400 hover:text-primary transition-colors cursor-pointer border border-border/20">
               <Paperclip className="h-4 w-4" />
             </button>
-            <input
-              type="text"
-              placeholder="Type your instruction or message..."
+            <input 
+              type="text" 
+              placeholder={`Send message as ${currentRole === "client" ? "Client" : "Artisan"}...`}
               value={typedMessage}
               onChange={(e) => setTypedMessage(e.target.value)}
-              className="flex-grow bg-background border border-border text-xs px-4 py-3 outline-none focus:border-primary"
+              className="flex-grow bg-neutral-900 border border-border/20 text-xs px-4 py-2.5 outline-none focus:border-primary placeholder-neutral-500 font-sans"
             />
-            <button 
-              type="submit" 
-              className="bg-primary text-primary-foreground font-semibold uppercase text-xs tracking-wider px-5 py-3 hover:bg-foreground hover:text-background transition-colors flex items-center gap-1.5 shrink-0"
-            >
-              Send
-              <Send className="h-3.5 w-3.5" />
+            <button type="submit" className="p-2.5 bg-primary text-primary-foreground hover:bg-foreground hover:text-background transition-colors cursor-pointer">
+              <Send className="h-4 w-4" />
             </button>
           </form>
-
         </div>
 
-        {/* PANEL C: RIGHT PANEL - ESCROW STATUS DRAWERS (Spans 3 columns) */}
-        <div className="w-80 border-l border-border flex flex-col bg-card/40 shrink-0 overflow-y-auto p-6 space-y-6">
-          <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-bold block">
-            Escrow Contract Vault
-          </span>
-
-          {/* Active Project Title block */}
-          <div className="space-y-1">
-            <h4 className="font-serif text-base font-bold text-foreground leading-tight">
-              {activeConv.projectTitle}
-            </h4>
-            <p className="text-[10px] text-neutral-400">Escrow ID: ESC-90218-LAG</p>
+        {/* PANEL C: RIGHT RAIL - ESCROW CONTROLS (Borderless payment info summary) */}
+        <div className="w-72 border-l border-border/20 bg-neutral-950 p-6 flex flex-col gap-6 shrink-0 overflow-y-auto">
+          <div className="space-y-1.5 border-b border-border/10 pb-4">
+            <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-bold block font-sans">Escrow Ledger</span>
+            <h4 className="font-serif text-sm font-semibold text-foreground line-clamp-2">{activeConv.projectTitle}</h4>
           </div>
 
-          {/* Escrow balance ledger card */}
-          <div className="border border-border p-4 bg-background space-y-3">
-            <div>
-              <span className="text-[9px] text-neutral-500 uppercase tracking-wider block font-semibold">Locked Balance</span>
-              {activeConv.lockedFunds > 0 ? (
-                <div className="flex items-center gap-2 mt-1">
-                  <Lock className="h-4 w-4 text-primary shrink-0" />
-                  <span className="text-xl font-bold font-serif text-primary">
-                    ₦{activeConv.lockedFunds.toLocaleString()}
-                  </span>
+          {activeConv.lockedFunds > 0 ? (
+            <div className="space-y-4">
+              <div className="bg-primary/5 p-4 border border-primary/20 space-y-2">
+                <span className="text-[9px] uppercase text-primary font-bold block font-sans">Safelocked Vault</span>
+                <p className="text-xl font-serif font-bold text-foreground">₦{activeConv.lockedFunds.toLocaleString()}</p>
+                <p className="text-[9px] text-neutral-400 leading-normal font-light font-sans">
+                  Funds are held in neutral escrow and will only be sent to the artisan when released by the client.
+                </p>
+              </div>
+
+              {/* Dynamic Operations */}
+              {currentRole === "client" ? (
+                <div className="space-y-2.5 pt-2">
+                  <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-bold block font-sans">Client Operations</span>
+                  
+                  {activeConv.orderStatus === "Review Pending" ? (
+                    <>
+                      <button 
+                        onClick={() => handleUpdateOrderStatus("Released")}
+                        className="w-full bg-primary text-primary-foreground font-semibold uppercase text-[10px] tracking-wider py-2.5 hover:bg-foreground hover:text-background transition-colors cursor-pointer"
+                      >
+                        Approve & Release Funds
+                      </button>
+                      <button 
+                        onClick={() => handleUpdateOrderStatus("Revision Requested")}
+                        className="w-full border border-border/30 hover:border-red-500 hover:text-red-500 text-[10px] uppercase font-bold py-2.5 transition-colors cursor-pointer"
+                      >
+                        Request Revisions
+                      </button>
+                    </>
+                  ) : (
+                    <div className="p-3 bg-neutral-900 text-neutral-500 text-[10px] leading-normal font-light border border-border/10 text-center font-sans">
+                      Awaiting artisan milestone upload to activate review actions.
+                    </div>
+                  )}
                 </div>
               ) : (
-                <div className="flex items-center gap-2 mt-1">
-                  <Unlock className="h-4 w-4 text-green-600 shrink-0" />
-                  <span className="text-xl font-bold font-serif text-green-600">
-                    ₦0.00 (Released)
-                  </span>
+                <div className="space-y-2.5 pt-2">
+                  <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-bold block font-sans">Artisan Operations</span>
+                  
+                  {activeConv.orderStatus === "In Progress" || activeConv.orderStatus === "Revision Requested" ? (
+                    <button 
+                      onClick={handleArtisanSubmit}
+                      className="w-full bg-primary text-primary-foreground font-semibold uppercase text-[10px] tracking-wider py-2.5 hover:bg-foreground hover:text-background transition-colors cursor-pointer"
+                    >
+                      Submit Work for Review
+                    </button>
+                  ) : (
+                    <div className="p-3 bg-neutral-900 text-neutral-500 text-[10px] leading-normal font-light border border-border/10 text-center font-sans">
+                      Milestone is under review by Client.
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-
-            <div className="border-t border-border/50 pt-2 text-[10px] text-neutral-500 flex justify-between">
-              <span>Status:</span>
-              <strong className="text-foreground uppercase tracking-wider">{activeConv.orderStatus}</strong>
-            </div>
-          </div>
-
-          {/* Milestones timeline check */}
-          <div className="space-y-3">
-            <h5 className="text-[10px] uppercase text-neutral-400 font-bold">Milestones Status</h5>
-            
-            <div className="space-y-3 text-xs">
-              <div className="flex gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                <div>
-                  <h6 className="font-semibold text-foreground">Figma UI Mockup (₦15,000)</h6>
-                  <span className="text-[9px] text-neutral-400 block font-light">Approved & Payout cleared</span>
-                </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="bg-green-500/5 p-4 border border-green-500/20 text-center space-y-2">
+                <CheckCircle className="h-8 w-8 text-green-500 mx-auto" />
+                <h5 className="text-xs font-bold text-green-600">Payment Released</h5>
+                <p className="text-[9px] text-neutral-400 leading-normal font-sans">
+                  The escrow safelock is empty. All project funds have been successfully deposited.
+                </p>
               </div>
-              <div className="flex gap-2">
-                {activeConv.orderStatus === "Released" ? (
-                  <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                ) : (
-                  <Clock className="h-4 w-4 text-primary shrink-0 mt-0.5 animate-pulse" />
-                )}
-                <div>
-                  <h6 className="font-semibold text-foreground">Layout Dev Draft (₦30,000)</h6>
-                  <span className="text-[9px] text-neutral-400 block font-light">
-                    {activeConv.orderStatus === "Released" 
-                      ? "Approved & Payout cleared" 
-                      : activeConv.orderStatus === "Review Pending"
-                      ? "Submitted lookup proof - Under review"
-                      : "In progress - waiting for Artisan draft"}
-                  </span>
-                </div>
+            </div>
+          )}
+
+          {/* Escrow Details */}
+          <div className="border-t border-border/10 pt-4 space-y-3">
+            <span className="text-[9px] uppercase tracking-wider text-neutral-400 font-bold block font-sans">Vault Status</span>
+            <div className="text-[10px] space-y-2 text-neutral-400 font-sans">
+              <div className="flex justify-between">
+                <span>Contract ID:</span>
+                <span className="font-semibold text-foreground">KW-801A-{activeConv.id}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Status:</span>
+                <span className="font-semibold text-foreground uppercase">{activeConv.orderStatus}</span>
               </div>
             </div>
           </div>
-
-          {/* Contextual Action Drawer based on roles */}
-          <div className="border-t border-border pt-6 space-y-3 shrink-0">
-            
-            {/* CLIENT ACTION INTERFACES */}
-            {currentRole === "client" ? (
-              activeConv.orderStatus === "Released" ? (
-                <div className="bg-green-500/10 border border-green-500/20 p-4 text-center text-xs text-green-600 font-semibold flex items-center justify-center gap-1.5">
-                  <CheckCircle className="h-4 w-4" />
-                  Contract fully closed
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <button 
-                    onClick={() => handleUpdateOrderStatus("Released")}
-                    className="w-full bg-primary text-primary-foreground font-semibold uppercase text-xs tracking-wider py-3 hover:bg-foreground hover:text-background transition-colors flex items-center justify-center gap-1.5"
-                    disabled={activeConv.orderStatus === "Released"}
-                  >
-                    <Unlock className="h-4 w-4" />
-                    Release Escrow Payout
-                  </button>
-                  <button 
-                    onClick={() => handleUpdateOrderStatus("Revision Requested")}
-                    className="w-full border border-border text-foreground hover:border-foreground font-semibold uppercase text-xs tracking-wider py-3 transition-colors"
-                    disabled={activeConv.orderStatus === "Released"}
-                  >
-                    Request Revision
-                  </button>
-                </div>
-              )
-            ) : (
-              /* ARTISAN ACTION INTERFACES */
-              activeConv.orderStatus === "Released" ? (
-                <div className="bg-green-500/10 border border-green-500/20 p-4 text-center text-xs text-green-600 font-semibold flex items-center justify-center gap-1.5">
-                  <CheckCircle className="h-4 w-4" />
-                  Escrow Funds Cleared
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <button 
-                    onClick={handleArtisanSubmit}
-                    className="w-full bg-foreground text-background dark:bg-white dark:text-black font-semibold uppercase text-xs tracking-wider py-3 hover:bg-primary hover:text-primary-foreground transition-colors flex items-center justify-center gap-1.5"
-                  >
-                    Submit Lookbook Proof
-                  </button>
-                  <button className="w-full border border-border text-neutral-400 text-xs font-semibold uppercase tracking-wider py-3 cursor-not-allowed" disabled>
-                    Request Extension
-                  </button>
-                </div>
-              )
-            )}
-
-            {/* Safety Escalation Alert */}
-            <div className="flex gap-2 p-3 bg-yellow-500/5 border border-yellow-500/10 text-[10px] text-neutral-500">
-              <AlertTriangle className="h-4 w-4 text-yellow-600 shrink-0 mt-0.5" />
-              <p className="leading-normal font-light">
-                Do not negotiate outside KÓ WON. External contracts bypass escrow vaults and waive lookup safety guarantees.
-              </p>
-            </div>
-
-          </div>
-
         </div>
 
       </div>

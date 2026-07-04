@@ -6,31 +6,23 @@ import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { 
-  ArrowLeft, 
   Search, 
   MapPin, 
   Star, 
-  ArrowUpRight, 
   SlidersHorizontal, 
   X, 
   CheckCircle2, 
-  Clock, 
-  FolderKanban, 
   Briefcase, 
   Scissors, 
   Code, 
   Camera, 
   Sparkles, 
   BookOpen, 
-  AlertCircle,
-  FileText,
-  DollarSign,
-  Compass,
-  HelpCircle
+  HelpCircle,
+  ShoppingBag,
+  Compass
 } from "lucide-react";
-import ThemeToggle from "@/components/theme-toggle";
-import Logo from "@/components/logo";
-import { supabase } from "@/components/supabase-client";
+import Navbar from "@/components/navbar";
 
 // Mock Showcase Gigs Data
 const GIGS_DATA = [
@@ -132,6 +124,52 @@ const GIGS_DATA = [
   }
 ];
 
+// Mock Campus Shop Direct Selling Products
+const PRODUCTS_DATA = [
+  {
+    id: 1,
+    name: "Oluwaseun Adewale",
+    school: "FUTA",
+    title: "Bespoke Hand-Crocheted Vintage Tote Bag",
+    price: 18000,
+    rating: 4.9,
+    reviews: 14,
+    imageBg: "bg-gradient-to-tr from-amber-700 via-amber-900 to-amber-950",
+    avatar: "OA",
+    category: "Fashion & Crafts",
+    instock: 3,
+    description: "Perfect study companion bag or weekend outfit complement. Hand stitched from 100% thick premium cotton threads."
+  },
+  {
+    id: 2,
+    name: "Funmi Daniels",
+    school: "UNILAG",
+    title: "3D Printed Campus Landmark Art Model",
+    price: 12000,
+    rating: 4.8,
+    reviews: 22,
+    imageBg: "bg-gradient-to-tr from-zinc-800 via-zinc-950 to-neutral-900",
+    avatar: "FD",
+    category: "Visual Media",
+    instock: 5,
+    description: "Exquisite desktop model of the UNILAG main gate senate building, printed with biodegradable PLA filament."
+  },
+  {
+    id: 3,
+    name: "Tunde Opeyemi",
+    school: "UNILAG",
+    title: "Study Guide: Next.js 15 & Supabase SaaS Blueprint",
+    price: 4500,
+    rating: 5.0,
+    reviews: 47,
+    imageBg: "bg-gradient-to-tr from-amber-800 via-yellow-950 to-amber-900",
+    avatar: "TO",
+    category: "Academics",
+    instock: 99,
+    description: "Digital ebook guide covering authentication, hooks, row-level security, payment locks, and clean folder structures."
+  }
+];
+
 // Mock Client Projects (Bidding Exchange)
 const PROJECTS_DATA = [
   {
@@ -171,18 +209,29 @@ const PROJECTS_DATA = [
 
 function MarketplaceContent() {
   const searchParams = useSearchParams();
-  const initialTab = searchParams.get("tab") === "exchange" ? "exchange" : "showcase";
+  const initialTab = (searchParams.get("tab") as any) || "showcase";
   
-  const [activeTab, setActiveTab] = useState<"showcase" | "exchange">(initialTab);
+  const [activeTab, setActiveTab] = useState<"showcase" | "exchange" | "products">(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedSchool, setSelectedSchool] = useState("All");
   const [maxPrice, setMaxPrice] = useState(150000);
   const [showFilters, setShowFilters] = useState(false);
 
+  // Modal states
+  const [selectedGigDetail, setSelectedGigDetail] = useState<typeof GIGS_DATA[0] | null>(null);
+  const [selectedProjectForBid, setSelectedProjectForBid] = useState<typeof PROJECTS_DATA[0] | null>(null);
+  
+  // Form Bid states
+  const [proposedBid, setProposedBid] = useState("");
+  const [deliveryDays, setDeliveryDays] = useState("");
+  const [pitchLetter, setPitchLetter] = useState("");
+  const [bidSubmitted, setBidSubmitted] = useState(false);
+
   const [user, setUser] = useState<any>(null);
   const [loadingSession, setLoadingSession] = useState(true);
 
+  // Auth Sync
   useEffect(() => {
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -198,21 +247,13 @@ function MarketplaceContent() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Modal states
-  const [selectedGigDetail, setSelectedGigDetail] = useState<typeof GIGS_DATA[0] | null>(null);
-  const [selectedProjectForBid, setSelectedProjectForBid] = useState<typeof PROJECTS_DATA[0] | null>(null);
-  
-  // Form Bid states
-  const [proposedBid, setProposedBid] = useState("");
-  const [deliveryDays, setDeliveryDays] = useState("");
-  const [pitchLetter, setPitchLetter] = useState("");
-  const [bidSubmitted, setBidSubmitted] = useState(false);
-
   // Sync tab state if query parameter changes
   useEffect(() => {
     const tabParam = searchParams.get("tab");
     if (tabParam === "exchange") {
       setActiveTab("exchange");
+    } else if (tabParam === "products") {
+      setActiveTab("products");
     } else {
       setActiveTab("showcase");
     }
@@ -258,57 +299,14 @@ function MarketplaceContent() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       
-      {/* 1. HEADER */}
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border px-4 sm:px-6 lg:px-8 py-4 w-full">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="hover:text-primary transition-colors text-neutral-400">
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-            <div className="flex items-center gap-2">
-              <Logo size={32} />
-              <span className="font-serif text-2xl font-bold tracking-widest text-foreground">KÓ WON</span>
-            </div>
-          </div>
+      {/* Reusable premium navbar */}
+      <Navbar />
 
-          <div className="flex items-center gap-6">
-            <ThemeToggle />
-            {loadingSession ? (
-              <span className="text-[10px] uppercase font-semibold text-neutral-500 tracking-wider">Loading...</span>
-            ) : user ? (
-              <div className="flex items-center gap-5">
-                <Link href="/auth/callback" className="text-xs uppercase font-semibold tracking-wider hover:text-primary transition-colors">
-                  Dashboard
-                </Link>
-                <Link href="/dashboard/inbox" className="text-xs uppercase font-semibold tracking-wider hover:text-primary transition-colors">
-                  Inbox
-                </Link>
-                <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs uppercase" title={user.email}>
-                  {user.user_metadata?.full_name?.substring(0, 2) || user.email?.substring(0, 2) || "U"}
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-5">
-                <Link href="/auth/login" className="text-xs uppercase font-semibold tracking-wider hover:text-primary transition-colors">
-                  Sign In
-                </Link>
-                <Link 
-                  href="/auth/signup" 
-                  className="bg-primary text-primary-foreground font-semibold uppercase text-[10px] tracking-wider px-5 py-2.5 hover:bg-foreground hover:text-background transition-all duration-300"
-                >
-                  Join as Talent
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* 2. SUB-HERO SEARCH & TABS PANELS */}
-      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-8">
+      {/* SUB-HERO SEARCH & TABS PANELS */}
+      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
         
-        {/* Search controls bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border border-border bg-card p-6">
+        {/* Search controls bar - Blends in with background */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-neutral-900/30 p-6 border border-border/30">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-3.5 h-4 w-4 text-neutral-400" />
             <input 
@@ -316,14 +314,14 @@ function MarketplaceContent() {
               placeholder={activeTab === "showcase" ? "Search student crafts, skills, or names..." : "Search client briefs, projects, or categories..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-background border border-border pl-10 pr-4 py-3 text-xs outline-none focus:border-primary"
+              className="w-full bg-background border border-border/40 pl-10 pr-4 py-3 text-xs outline-none focus:border-primary"
             />
           </div>
           
           <div className="flex gap-3">
             <button 
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 bg-neutral-100 dark:bg-neutral-900 border border-border px-4 py-3 text-xs font-semibold uppercase tracking-wider hover:bg-primary hover:text-primary-foreground transition-colors"
+              className="flex items-center gap-2 bg-neutral-900/60 border border-border/40 px-4 py-3 text-xs font-semibold uppercase tracking-wider hover:bg-primary hover:text-primary-foreground transition-all cursor-pointer"
             >
               <SlidersHorizontal className="h-4 w-4" />
               Filters
@@ -333,7 +331,7 @@ function MarketplaceContent() {
 
         {/* Expandable Advanced Filters */}
         {showFilters && (
-          <div className="border border-border bg-card p-6 grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
+          <div className="bg-neutral-900/40 border border-border/30 p-6 grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
             <div className="space-y-2">
               <label className="text-[10px] uppercase text-neutral-400 font-bold block">Campus Filter</label>
               <select 
@@ -373,7 +371,7 @@ function MarketplaceContent() {
                   setSelectedCategory("All");
                   setMaxPrice(150000);
                 }}
-                className="w-full border border-border hover:border-red-500 hover:text-red-500 text-xs font-semibold uppercase tracking-wider py-3 transition-colors"
+                className="w-full border border-border hover:border-red-500 hover:text-red-500 text-xs font-semibold uppercase tracking-wider py-3 transition-colors cursor-pointer"
               >
                 Reset Filters
               </button>
@@ -382,27 +380,37 @@ function MarketplaceContent() {
         )}
 
         {/* Main Tab Switcher */}
-        <div className="flex justify-between items-center border-b border-border pb-2">
+        <div className="flex justify-between items-center border-b border-border/20 pb-2">
           <div className="flex gap-8 text-sm font-semibold uppercase tracking-wider">
             <button
               onClick={() => setActiveTab("showcase")}
-              className={`pb-2.5 transition-all ${
+              className={`pb-2.5 transition-all cursor-pointer ${
                 activeTab === "showcase"
-                  ? "border-b-2 border-primary text-foreground font-bold text-base"
-                  : "text-neutral-400 hover:text-foreground"
+                  ? "border-b-2 border-primary text-foreground font-bold text-xs"
+                  : "text-neutral-400 hover:text-foreground text-xs"
               }`}
             >
-              The Showcase (Buy Gigs)
+              Marketplace Gigs
+            </button>
+            <button
+              onClick={() => setActiveTab("products")}
+              className={`pb-2.5 transition-all cursor-pointer ${
+                activeTab === "products"
+                  ? "border-b-2 border-primary text-foreground font-bold text-xs"
+                  : "text-neutral-400 hover:text-foreground text-xs"
+              }`}
+            >
+              Campus Shop
             </button>
             <button
               onClick={() => setActiveTab("exchange")}
-              className={`pb-2.5 transition-all ${
+              className={`pb-2.5 transition-all cursor-pointer ${
                 activeTab === "exchange"
-                  ? "border-b-2 border-primary text-foreground font-bold text-base"
-                  : "text-neutral-400 hover:text-foreground"
+                  ? "border-b-2 border-primary text-foreground font-bold text-xs"
+                  : "text-neutral-400 hover:text-foreground text-xs"
               }`}
             >
-              The Exchange (Bid Projects)
+              The Exchange (Bids)
             </button>
           </div>
         </div>
@@ -442,7 +450,7 @@ function MarketplaceContent() {
 
             {/* Dynamic Brief or Signup Promotion Banner */}
             {user ? (
-              <div className="bg-card border border-border p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+              <div className="bg-neutral-900/30 border border-border/30 p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <div className="h-12 w-12 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
                     <Briefcase className="h-6 w-6" />
@@ -462,7 +470,7 @@ function MarketplaceContent() {
                 </button>
               </div>
             ) : (
-              <div className="bg-card border border-border p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+              <div className="bg-neutral-900/30 border border-border/30 p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <div className="h-12 w-12 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
                     <Sparkles className="h-6 w-6" />
@@ -512,7 +520,7 @@ function MarketplaceContent() {
                 })}
               </div>
 
-              {/* Gigs List Column */}
+              {/* Gigs List Column - Card elements blend into the background (borderless, premium) */}
               <div className="lg:col-span-3">
                 {filteredGigs.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -521,7 +529,7 @@ function MarketplaceContent() {
                       return (
                         <div 
                           key={gig.id} 
-                          className="group relative bg-card text-card-foreground border border-border p-5 transition-all duration-500 hover:shadow-xl hover:border-primary flex flex-col justify-between"
+                          className="group relative bg-neutral-900/10 hover:bg-neutral-900/30 p-5 transition-all duration-300 flex flex-col justify-between"
                         >
                           <div>
                             {/* Banner background representation with Heart Bookmark overlay */}
@@ -615,13 +623,132 @@ function MarketplaceContent() {
           </div>
         )}
 
-        {/* 4. EXCHAGE (PROJECT TENDERS BIDS) */}
+        {/* 4. CAMPUS SHOP (DIRECT PRODUCT SELLING) */}
+        {activeTab === "products" && (
+          <div className="space-y-8 animate-fade-in">
+            
+            {/* Greeting (showcase.png style) */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h1 className="font-serif text-3xl md:text-4xl font-light text-foreground">Campus Shop</h1>
+                <p className="text-xs text-neutral-400 mt-1 font-sans">Buy premium physical products, downloads, and guides direct from campus artisans.</p>
+              </div>
+            </div>
+
+            {/* Showcase Grid Columns */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+              
+              {/* Vertical Categories List Sidebar (Fiverr style - hidden on mobile) */}
+              <div className="lg:col-span-1 space-y-2 hidden lg:block">
+                <h3 className="text-[10px] uppercase tracking-widest text-primary font-bold mb-4 font-sans">Categories</h3>
+                {[
+                  { name: "All", label: "Keep exploring", icon: Compass },
+                  { name: "Code & Dev", label: "Code & Dev", icon: Code },
+                  { name: "Fashion & Crafts", label: "Fashion & Crafts", icon: Scissors },
+                  { name: "Visual Media", label: "Visual Media", icon: Camera },
+                  { name: "Academics", label: "Academics & Study", icon: BookOpen }
+                ].map((cat) => {
+                  const Icon = cat.icon;
+                  return (
+                    <button
+                      key={cat.name}
+                      onClick={() => setSelectedCategory(cat.name)}
+                      className={`w-full flex items-center gap-3 px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-left border transition-all duration-300 cursor-pointer ${
+                        selectedCategory === cat.name
+                          ? "bg-primary text-primary-foreground border-primary font-bold"
+                          : "bg-card text-foreground border-border hover:border-primary"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      <span>{cat.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Products List Column - borderless, matching background */}
+              <div className="lg:col-span-3">
+                {PRODUCTS_DATA.filter(prod => selectedCategory === "All" || prod.category === selectedCategory).length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {PRODUCTS_DATA.filter(prod => selectedCategory === "All" || prod.category === selectedCategory)
+                      .map((prod) => {
+                        return (
+                          <div 
+                            key={prod.id} 
+                            className="group relative bg-neutral-900/10 hover:bg-neutral-900/30 p-5 transition-all duration-300 flex flex-col justify-between"
+                          >
+                            <div>
+                              {/* Thumbnail */}
+                              <div className={`h-40 w-full ${prod.imageBg} relative overflow-hidden mb-5 flex items-center justify-center`}>
+                                <div className="absolute top-3 left-3 bg-background border border-border text-[9px] font-bold tracking-wider px-2 py-0.5 uppercase font-sans">
+                                  {prod.category}
+                                </div>
+                                <div className="absolute top-3 right-3 bg-primary/20 text-primary border border-primary/30 text-[8px] font-bold px-2 py-0.5">
+                                  {prod.instock} In Stock
+                                </div>
+                              </div>
+
+                              {/* Seller avatar and info */}
+                              <div className="flex items-center gap-3 mb-4">
+                                <div className="h-9 w-9 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm font-serif">
+                                  {prod.avatar}
+                                </div>
+                                <div>
+                                  <h4 className="text-xs font-bold text-foreground">{prod.name}</h4>
+                                  <p className="text-[9px] text-neutral-400 mt-0.5 font-sans">{prod.school}</p>
+                                </div>
+                              </div>
+
+                              <h3 className="font-serif text-sm font-semibold text-foreground leading-snug line-clamp-2 hover:text-primary transition-colors cursor-pointer">
+                                {prod.title}
+                              </h3>
+                              <p className="text-[11px] text-neutral-400 mt-2 font-sans line-clamp-2">{prod.description}</p>
+                            </div>
+
+                            {/* Footer price and rating */}
+                            <div className="flex items-center justify-between border-t border-border/30 mt-5 pt-4">
+                              <div className="flex items-center gap-1 text-[11px] font-bold text-primary font-sans">
+                                <Star className="h-3.5 w-3.5 fill-current" />
+                                <span>{prod.rating.toFixed(1)}</span>
+                                <span className="text-neutral-400 font-normal">({prod.reviews})</span>
+                              </div>
+                              
+                              <div className="text-right font-sans">
+                                <span className="text-[8px] text-neutral-400 uppercase tracking-wider font-semibold block">Price</span>
+                                <p className="text-sm font-bold text-foreground">₦{prod.price.toLocaleString()}</p>
+                              </div>
+                            </div>
+
+                            {/* Buy Direct button */}
+                            <button 
+                              onClick={() => alert(`🛒 Direct Checkout: You are purchasing "${prod.title}" for ₦${prod.price.toLocaleString()} via KÓ WON Escrow.`)}
+                              className="w-full mt-4 bg-foreground text-background dark:bg-white dark:text-black py-2.5 text-xs font-semibold uppercase tracking-wider hover:bg-primary hover:text-primary-foreground transition-all duration-300 cursor-pointer"
+                            >
+                              Buy Direct
+                            </button>
+                          </div>
+                        );
+                      })}
+                  </div>
+                ) : (
+                  <div className="text-center py-20 border border-dashed border-border bg-neutral-50 dark:bg-neutral-900">
+                    <HelpCircle className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-serif">No Products Found</h3>
+                    <p className="text-sm text-neutral-400 max-w-xs mx-auto mt-2 font-sans">We couldn't find any campus products fitting that category.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 5. EXCHANGE (PROJECT TENDERS BIDS) */}
         {activeTab === "exchange" && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fade-in">
             {filteredProjects.map((project) => (
               <div 
                 key={project.id}
-                className="border border-border bg-card p-6 flex flex-col md:flex-row md:items-start justify-between gap-6 hover:border-primary transition-all duration-300"
+                className="bg-neutral-900/10 hover:bg-neutral-900/30 p-6 flex flex-col md:flex-row md:items-start justify-between gap-6 transition-all duration-300"
               >
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-3">
@@ -649,7 +776,7 @@ function MarketplaceContent() {
                   </div>
                 </div>
 
-                <div className="flex items-center md:flex-col md:items-end justify-between border-t md:border-t-0 border-border pt-4 md:pt-0 gap-4 shrink-0">
+                <div className="flex items-center md:flex-col md:items-end justify-between border-t md:border-t-0 border-border/30 pt-4 md:pt-0 gap-4 shrink-0">
                   <div className="text-left md:text-right">
                     <span className="text-[9px] text-neutral-500 uppercase tracking-wider block">Target Budget</span>
                     <span className="text-xl font-bold font-serif text-foreground">₦{project.budget.toLocaleString()}</span>
@@ -657,7 +784,7 @@ function MarketplaceContent() {
 
                   <button 
                     onClick={() => setSelectedProjectForBid(project)}
-                    className="bg-foreground text-background dark:bg-white dark:text-black font-semibold text-xs uppercase tracking-wider px-6 py-3 hover:bg-primary hover:text-primary-foreground transition-all duration-300"
+                    className="bg-foreground text-background dark:bg-white dark:text-black font-semibold text-xs uppercase tracking-wider px-6 py-3 hover:bg-primary hover:text-primary-foreground transition-all duration-300 cursor-pointer"
                   >
                     Submit Pitch
                   </button>
@@ -672,12 +799,12 @@ function MarketplaceContent() {
       {/* MODAL 1: GIG DETAILS DRAWER */}
       {selectedGigDetail && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-end">
-          <div className="bg-card text-card-foreground border-l border-border h-full max-w-lg w-full p-8 space-y-6 relative overflow-y-auto flex flex-col justify-between animate-slide-in-right">
+          <div className="bg-neutral-900 border-l border-border/40 h-full max-w-lg w-full p-8 space-y-6 relative overflow-y-auto flex flex-col justify-between animate-slide-in-right">
             
             <div className="space-y-6">
               <button 
                 onClick={() => setSelectedGigDetail(null)}
-                className="absolute top-6 right-6 text-neutral-400 hover:text-primary transition-colors"
+                className="absolute top-6 right-6 text-neutral-400 hover:text-primary transition-colors cursor-pointer"
               >
                 <X className="h-6 w-6" />
               </button>
@@ -696,8 +823,8 @@ function MarketplaceContent() {
                 </div>
               </div>
 
-              <div className="border border-border p-4 bg-background">
-                <span className="text-[10px] text-neutral-400 uppercase font-bold block mb-2">Description</span>
+              <div className="bg-background/40 p-4 border border-border/30">
+                <span className="text-[10px] text-neutral-400 uppercase font-bold block mb-2 font-sans">Description</span>
                 <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed font-light">
                   {selectedGigDetail.description}
                 </p>
@@ -707,22 +834,22 @@ function MarketplaceContent() {
                 <span className="text-[10px] text-neutral-400 uppercase font-bold block">Skills Required</span>
                 <div className="flex flex-wrap gap-2">
                   {selectedGigDetail.skills.map((skill, idx) => (
-                    <span key={idx} className="text-[9px] font-bold uppercase tracking-wider border border-border px-3 py-1 bg-background text-neutral-500">
+                    <span key={idx} className="text-[9px] font-bold uppercase tracking-wider border border-border/30 px-3 py-1 bg-background text-neutral-500 font-sans">
                       {skill}
                     </span>
                   ))}
                 </div>
               </div>
 
-              <div className="border border-border bg-primary/5 p-4 space-y-2">
-                <span className="text-[10px] text-primary uppercase font-bold block">Secure Escrow Safe lock</span>
+              <div className="bg-primary/5 p-4 space-y-2 border border-primary/20">
+                <span className="text-[10px] text-primary uppercase font-bold block">Secure Escrow Safelock</span>
                 <p className="text-[9px] text-neutral-400 leading-relaxed font-light">
                   Upon booking, your project budget is immediately locked into the secure KÓ WON escrow vault. Funds are only transferred to the student's local bank account after you review and approve their work.
                 </p>
               </div>
             </div>
 
-            <div className="border-t border-border pt-6 flex items-center justify-between bg-card shrink-0 mt-6">
+            <div className="border-t border-border/30 pt-6 flex items-center justify-between shrink-0 mt-6">
               <div>
                 <span className="text-[10px] text-neutral-500 uppercase tracking-wider block">Standard Rate</span>
                 <span className="text-2xl font-bold font-serif text-foreground">₦{selectedGigDetail.startingPrice.toLocaleString()}</span>
@@ -743,22 +870,22 @@ function MarketplaceContent() {
       {/* MODAL 2: SUBMIT BID PROPOSAL */}
       {selectedProjectForBid && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card text-card-foreground border border-border max-w-lg w-full p-6 space-y-6 relative max-h-[90vh] overflow-y-auto animate-fade-in">
+          <div className="bg-neutral-900 border border-border/40 max-w-lg w-full p-6 space-y-6 relative max-h-[90vh] overflow-y-auto animate-fade-in">
             <button 
               onClick={() => setSelectedProjectForBid(null)}
-              className="absolute top-4 right-4 text-neutral-400 hover:text-primary transition-colors"
+              className="absolute top-4 right-4 text-neutral-400 hover:text-primary transition-colors cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
 
             <div className="space-y-1">
-              <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider">Submit Bid Pitch</span>
+              <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider font-sans">Submit Bid Pitch</span>
               <h3 className="font-serif text-xl font-bold leading-tight">{selectedProjectForBid.title}</h3>
               <p className="text-xs text-neutral-500 font-light">Target Budget: <strong>₦{selectedProjectForBid.budget.toLocaleString()}</strong></p>
             </div>
 
             {bidSubmitted ? (
-              <div className="border border-primary bg-primary/5 p-8 text-center space-y-4">
+              <div className="bg-primary/5 p-8 text-center space-y-4 border border-primary/20">
                 <CheckCircle2 className="h-12 w-12 text-primary mx-auto" />
                 <h4 className="font-serif text-lg font-bold">Proposal Pitch Sent</h4>
                 <p className="text-xs text-neutral-500">Your proposal is now visible to the client. You can track this thread in your Inbox.</p>
@@ -774,7 +901,7 @@ function MarketplaceContent() {
                       required
                       value={proposedBid}
                       onChange={(e) => setProposedBid(e.target.value.replace(/[^0-9]/g, ""))}
-                      className="w-full bg-background border border-border text-xs p-3 outline-none focus:border-primary"
+                      className="w-full bg-background border border-border/30 text-xs p-3 outline-none focus:border-primary"
                     />
                   </div>
                   <div className="space-y-1">
@@ -785,7 +912,7 @@ function MarketplaceContent() {
                       required
                       value={deliveryDays}
                       onChange={(e) => setDeliveryDays(e.target.value.replace(/[^0-9]/g, ""))}
-                      className="w-full bg-background border border-border text-xs p-3 outline-none focus:border-primary"
+                      className="w-full bg-background border border-border/30 text-xs p-3 outline-none focus:border-primary"
                     />
                   </div>
                 </div>
@@ -797,13 +924,13 @@ function MarketplaceContent() {
                     required
                     value={pitchLetter}
                     onChange={(e) => setPitchLetter(e.target.value)}
-                    className="w-full bg-background border border-border text-xs p-3 outline-none focus:border-primary h-28 resize-none"
+                    className="w-full bg-background border border-border/30 text-xs p-3 outline-none focus:border-primary h-28 resize-none"
                   />
                 </div>
 
                 <button 
                   type="submit" 
-                  className="bg-primary text-primary-foreground font-semibold uppercase text-xs tracking-wider py-3.5 w-full hover:bg-foreground hover:text-background transition-colors"
+                  className="bg-primary text-primary-foreground font-semibold uppercase text-xs tracking-wider py-3.5 w-full hover:bg-foreground hover:text-background transition-colors cursor-pointer"
                 >
                   Submit Proposal Pitch
                 </button>
