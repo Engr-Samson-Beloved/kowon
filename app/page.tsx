@@ -198,6 +198,12 @@ export default function Page() {
   return (
     <div className="dark min-h-screen bg-background text-foreground flex flex-col font-sans">
       
+      {/* Top Alert Promo Banner (Upwork style) */}
+      <div className="bg-primary/10 border-b border-primary/20 py-2.5 px-6 text-center text-[10px] sm:text-xs font-semibold tracking-wider text-primary uppercase flex items-center justify-center gap-2">
+        <span>🎓 Student-Powered & Commission-Free. Hire the top 1% of campus creators on KÓ WON.</span>
+        <a href="#marketplace" className="underline hover:text-white transition-colors ml-1 font-bold">Browse Live Gigs & Bids →</a>
+      </div>
+      
       {/* JSON-LD Structured Schema Markup for SEO */}
       <script
         type="application/ld+json"
@@ -292,6 +298,42 @@ export default function Page() {
               </h1>
             </div>
 
+            {/* Segmented Option Toggle (Upwork style) */}
+            <div className={`transition-all duration-500 ease-in-out origin-top ${
+              isSearchActive 
+                ? "max-h-0 opacity-0 overflow-hidden mt-0" 
+                : "max-h-16 opacity-100 mt-4"
+            }`}>
+              <div className="inline-flex bg-neutral-900 border border-border p-1">
+                <button 
+                  onClick={() => {
+                    setActiveTab("showcase");
+                    setIsSearchActive(false);
+                  }}
+                  className={`px-6 py-2 text-xs font-semibold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+                    activeTab === "showcase" 
+                      ? "bg-primary text-primary-foreground font-bold" 
+                      : "text-neutral-400 hover:text-foreground"
+                  }`}
+                >
+                  Hire Talent
+                </button>
+                <button 
+                  onClick={() => {
+                    setActiveTab("exchange");
+                    setIsSearchActive(false);
+                  }}
+                  className={`px-6 py-2 text-xs font-semibold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+                    activeTab === "exchange" 
+                      ? "bg-primary text-primary-foreground font-bold" 
+                      : "text-neutral-400 hover:text-foreground"
+                  }`}
+                >
+                  Find Work
+                </button>
+              </div>
+            </div>
+
             {/* Direct Search Bar (Elevates and animates width) */}
             <div className="space-y-2">
               {isSearchActive && (
@@ -299,14 +341,14 @@ export default function Page() {
                   Search Directory Active
                 </span>
               )}
-              <div className={`flex items-center bg-card border border-border p-2 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-500 ease-in-out ${
-                isSearchActive ? "shadow-lg max-w-3xl border-primary" : "max-w-lg"
+              <div className={`flex items-center bg-card border border-border rounded-full p-1.5 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-500 ease-in-out ${
+                isSearchActive ? "shadow-lg max-w-3xl border-primary" : "max-w-xl"
               }`}>
-                <Search className="h-5 w-5 text-neutral-400 mx-2" />
+                <Search className="h-5 w-5 text-neutral-400 ml-4 shrink-0" />
                 <input 
                   type="text" 
                   placeholder={PLACEHOLDERS[placeholderIdx]} 
-                  className="w-full bg-transparent border-none outline-none text-sm text-foreground placeholder-neutral-400 px-1 py-2"
+                  className="w-full bg-transparent border-none outline-none text-sm text-foreground placeholder-neutral-400 px-3 py-2.5 rounded-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchActive(true)}
@@ -325,8 +367,14 @@ export default function Page() {
                   </button>
                 )}
                 
-                <button className="bg-primary hover:bg-foreground hover:text-background text-primary-foreground font-semibold px-6 py-2.5 text-xs uppercase tracking-wider transition-colors shrink-0">
-                  Find Value
+                <button 
+                  onClick={() => {
+                    setIsSearchActive(true);
+                    document.getElementById("marketplace")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="bg-primary hover:bg-white hover:text-black text-primary-foreground font-semibold px-6 py-2.5 rounded-full text-xs uppercase tracking-wider transition-all duration-300 shrink-0"
+                >
+                  {activeTab === "showcase" ? "Find Talent" : "Find Work"}
                 </button>
               </div>
             </div>
@@ -391,6 +439,22 @@ export default function Page() {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* Trending Skills Ticker (Upwork style) */}
+            <div className={`overflow-hidden border-t border-b border-border/40 py-3 mt-6 max-w-lg transition-all duration-500 ${isSearchActive ? "max-h-0 opacity-0 py-0 border-y-0" : "max-h-16 opacity-100"}`}>
+              <div className="flex items-center gap-4 text-[9px] tracking-widest font-bold shrink-0 select-none overflow-x-auto scrollbar-none">
+                <span className="text-primary uppercase shrink-0 font-serif font-black">TRENDING SKILLS:</span>
+                <div className="flex gap-6 shrink-0 animate-pulse text-neutral-400">
+                  <span>NEXT.JS DEV <span className="text-emerald-500">+240%</span></span>
+                  <span>•</span>
+                  <span>ANKARA DESIGN <span className="text-emerald-500">+180%</span></span>
+                  <span>•</span>
+                  <span>CALCULUS MATH <span className="text-emerald-500">+310%</span></span>
+                  <span>•</span>
+                  <span>VIDEOGRAPHY <span className="text-emerald-500">+195%</span></span>
+                </div>
               </div>
             </div>
 
