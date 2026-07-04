@@ -165,14 +165,36 @@ const PLACEHOLDERS = [
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState<"showcase" | "exchange">("showcase");
+  const [placeholder, setPlaceholder] = useState("");
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
+  const [charIdx, setCharIdx] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const currentWord = PLACEHOLDERS[placeholderIdx];
+    let timer;
+
+    if (isDeleting) {
+      timer = setTimeout(() => {
+        setPlaceholder(currentWord.substring(0, charIdx - 1));
+        setCharIdx((prev) => prev - 1);
+      }, 50);
+    } else {
+      timer = setTimeout(() => {
+        setPlaceholder(currentWord.substring(0, charIdx + 1));
+        setCharIdx((prev) => prev + 1);
+      }, 100);
+    }
+
+    if (!isDeleting && charIdx === currentWord.length) {
+      timer = setTimeout(() => setIsDeleting(true), 2500);
+    } else if (isDeleting && charIdx === 0) {
+      setIsDeleting(false);
       setPlaceholderIdx((prev) => (prev + 1) % PLACEHOLDERS.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+    }
+
+    return () => clearTimeout(timer);
+  }, [charIdx, isDeleting, placeholderIdx]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -293,9 +315,12 @@ export default function Page() {
             }`}>
               <h1 className="font-serif text-5xl md:text-7xl font-extralight tracking-tight leading-none">
                 Premium Talents. <br />
-                Crafted Services. <br />
                 <span className="italic text-primary font-normal">Affordable Luxury.</span>
               </h1>
+              
+              <p className="max-w-md text-neutral-400 text-sm leading-relaxed font-light mt-4">
+                KÓ WON is Nigeria’s first student-powered freelance ecosystem—connecting campus developers, tailors, photographers, and academic tutors directly with businesses for commission-free, premium project execution.
+              </p>
             </div>
 
             {/* Segmented Option Toggle (Upwork style) */}
@@ -347,7 +372,7 @@ export default function Page() {
                 <Search className="h-5 w-5 text-neutral-400 ml-4 shrink-0" />
                 <input 
                   type="text" 
-                  placeholder={PLACEHOLDERS[placeholderIdx]} 
+                  placeholder={placeholder} 
                   className="w-full bg-transparent border-none outline-none text-sm text-foreground placeholder-neutral-400 px-3 py-2.5 rounded-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -403,44 +428,7 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Upwork-style Interactive Category Cards Grid (collapses on search) */}
-            <div className={`transition-all duration-500 ease-in-out origin-top ${
-              isSearchActive 
-                ? "max-h-0 opacity-0 overflow-hidden mt-0" 
-                : "max-h-[300px] opacity-100 mt-6"
-            }`}>
-              <div className="grid grid-cols-2 gap-4 max-w-lg">
-                {[
-                  { name: "Code & Dev", count: "48 Talents", icon: Code, tags: "React, Next.js, APIs" },
-                  { name: "Fashion & Crafts", count: "62 Talents", icon: Scissors, tags: "Agbada, Crochet, Bags" },
-                  { name: "Visual Media", count: "35 Talents", icon: Camera, tags: "Reels, Portraits, Logo" },
-                  { name: "Academics", count: "29 Talents", icon: BookOpen, tags: "Math, Physics, Prep" }
-                ].map((cat) => {
-                  const Icon = cat.icon;
-                  return (
-                    <div 
-                      key={cat.name} 
-                      onClick={() => {
-                        setSelectedCategory(cat.name);
-                        document.getElementById("marketplace")?.scrollIntoView({ behavior: "smooth" });
-                      }}
-                      className="group p-4 bg-card border border-border/80 hover:border-primary hover:bg-neutral-900/50 transition-all duration-300 cursor-pointer flex flex-col justify-between h-28"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="p-1.5 bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-                          <Icon className="h-4 w-4" />
-                        </div>
-                        <ArrowUpRight className="h-4 w-4 text-neutral-500 group-hover:text-primary transition-colors" />
-                      </div>
-                      <div>
-                        <h3 className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors">{cat.name}</h3>
-                        <p className="text-[9px] text-neutral-400 mt-1">{cat.count} • <span className="text-neutral-500 font-light">{cat.tags}</span></p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+
 
             {/* Trending Skills Ticker (Upwork style) */}
             <div className={`overflow-hidden border-t border-b border-border/40 py-3 mt-6 max-w-lg transition-all duration-500 ${isSearchActive ? "max-h-0 opacity-0 py-0 border-y-0" : "max-h-16 opacity-100"}`}>
@@ -542,60 +530,7 @@ export default function Page() {
         </div>
       </section>
 
-      {/* 3. VALUE PROPOSITION SECTION */}
-      <section id="value" className={`bg-secondary text-secondary-foreground py-16 px-6 lg:px-24 transition-all duration-500 ${isSearchActive ? "hidden opacity-0 pointer-events-none" : "opacity-100"}`}>
-        <div className="max-w-7xl mx-auto">
-          <ScrollAnimate variant="fade">
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-secondary-foreground/20 pb-12 mb-12">
-              <div>
-                <span className="text-xs uppercase tracking-widest text-primary font-bold">Why KÓ WON Matters</span>
-                <h2 className="font-serif text-3xl md:text-5xl font-light mt-2">Redefining Affordable Excellence</h2>
-              </div>
-              <p className="max-w-md text-sm text-secondary-foreground/75 leading-relaxed">
-                We leverage verified university rosters to offer professional-grade work from highly ambitious students without the corporate agency price tag.
-              </p>
-            </div>
-          </ScrollAnimate>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <ScrollAnimate variant="slide-up" delay={0}>
-              <div className="space-y-4">
-                <div className="bg-primary/10 text-primary border border-primary/30 p-3 inline-block">
-                  <CheckCircle className="h-6 w-6" />
-                </div>
-                <h3 className="font-serif text-xl font-bold">Vetted Student Rosters</h3>
-                <p className="text-sm text-secondary-foreground/80 leading-relaxed">
-                  Every student freelancer must register with their official institutional credentials, ensuring trust and professional accountability.
-                </p>
-              </div>
-            </ScrollAnimate>
-            
-            <ScrollAnimate variant="slide-up" delay={150}>
-              <div className="space-y-4">
-                <div className="bg-primary/10 text-primary border border-primary/30 p-3 inline-block">
-                  <Zap className="h-6 w-6" />
-                </div>
-                <h3 className="font-serif text-xl font-bold">Guaranteed Affordability</h3>
-                <p className="text-sm text-secondary-foreground/80 leading-relaxed">
-                  True to our name (KÓ WON — *“It's Affordable”*), student services and crafts are structured without inflated administrative costs.
-                </p>
-              </div>
-            </ScrollAnimate>
-            
-            <ScrollAnimate variant="slide-up" delay={300}>
-              <div className="space-y-4">
-                <div className="bg-primary/10 text-primary border border-primary/30 p-3 inline-block">
-                  <Star className="h-6 w-6" />
-                </div>
-                <h3 className="font-serif text-xl font-bold">Direct Secure Escrow</h3>
-                <p className="text-sm text-secondary-foreground/80 leading-relaxed">
-                  Funds are held securely and only released when the client verifies and approves the final craft product or digital deliverable.
-                </p>
-              </div>
-            </ScrollAnimate>
-          </div>
-        </div>
-      </section>
 
       {/* 4. THE MARKETPLACE HUB (The Showcase / The Exchange Toggle) */}
       <section id="marketplace" className={`px-6 lg:px-24 bg-background text-foreground flex-1 transition-all duration-500 ${isSearchActive ? "py-8" : "py-20"}`}>
@@ -656,85 +591,165 @@ export default function Page() {
 
           {/* VIEW A: THE SHOWCASE (Fiverr style, Catalog of Gigs) */}
           {activeTab === "showcase" && (
-            <div>
-              {filteredGigs.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {filteredGigs.map((gig) => {
-                    const CategoryIcon = gig.icon;
+            <div className="space-y-8 animate-fade-in">
+              
+              {/* Personalized Greeting (Upwork & Fiverr style) */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h2 className="font-serif text-3xl md:text-4xl font-light text-foreground">Welcome back, Samson Olabanji</h2>
+                  <p className="text-xs text-neutral-400 mt-1 font-sans">Explore recommended offers and trending projects across Nigerian campuses.</p>
+                </div>
+              </div>
+
+              {/* Recommended Brief Prompt Banner */}
+              <div className="bg-card border border-border p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                    <Briefcase className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm">Post a project brief</h3>
+                    <p className="text-xs text-neutral-400 mt-0.5 font-sans">Get tailored offers and pitches from verified campus talents for your custom needs.</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => {
+                    setActiveTab("exchange");
+                  }}
+                  className="border border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-6 py-2.5 text-xs uppercase tracking-wider transition-all duration-300 cursor-pointer"
+                >
+                  Get started
+                </button>
+              </div>
+
+              {/* Showcase Grid Columns */}
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+                
+                {/* Vertical Categories List Sidebar (Fiverr style - hidden on mobile) */}
+                <div className="lg:col-span-1 space-y-2 hidden lg:block">
+                  <h3 className="text-[10px] uppercase tracking-widest text-primary font-bold mb-4 font-sans">Categories</h3>
+                  {[
+                    { name: "All", label: "Keep exploring", icon: Compass },
+                    { name: "Code & Dev", label: "Code & Dev", icon: Code },
+                    { name: "Fashion & Crafts", label: "Fashion & Crafts", icon: Scissors },
+                    { name: "Visual Media", label: "Visual Media", icon: Camera },
+                    { name: "Academics", label: "Academics & Study", icon: BookOpen }
+                  ].map((cat) => {
+                    const Icon = cat.icon;
                     return (
-                      <div 
-                        key={gig.id} 
-                        className="group relative bg-card text-card-foreground border border-border p-6 transition-all duration-500 hover:shadow-xl hover:border-primary flex flex-col justify-between"
+                      <button
+                        key={cat.name}
+                        onClick={() => setSelectedCategory(cat.name)}
+                        className={`w-full flex items-center gap-3 px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-left border transition-all duration-300 cursor-pointer ${
+                          selectedCategory === cat.name
+                            ? "bg-primary text-primary-foreground border-primary font-bold"
+                            : "bg-card text-foreground border-border hover:border-primary"
+                        }`}
                       >
-                        <div>
-                          {/* Banner background representation */}
-                          <div className={`h-40 w-full ${gig.imageBg} relative overflow-hidden mb-5 flex items-center justify-center`}>
-                            <CategoryIcon className="h-12 w-12 text-white/40 group-hover:scale-110 transition-transform duration-500" />
-                            <div className="absolute top-3 left-3 bg-background border border-border text-[9px] font-bold tracking-wider px-2 py-0.5 uppercase">
-                              {gig.category}
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className="h-10 w-10 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-                              {gig.avatar}
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <h4 className="text-sm font-bold text-foreground">{gig.name}</h4>
-                                <span className={`text-[8px] font-bold px-1.5 py-0.5 border ${
-                                  gig.rank === "Gold Pro"
-                                    ? "bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/20"
-                                    : gig.rank === "Silver"
-                                    ? "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20"
-                                    : "bg-orange-500/10 text-orange-800 dark:text-orange-400 border-orange-500/20"
-                                }`}>
-                                  {gig.rank}
-                                </span>
-                              </div>
-                              <p className="text-[10px] text-neutral-500 dark:text-neutral-400 flex items-center gap-1 mt-0.5">
-                                <MapPin className="h-3 w-3 shrink-0 text-primary" />
-                                {gig.school}
-                              </p>
-                            </div>
-                          </div>
-
-                          <h3 className="font-serif text-lg font-normal text-foreground leading-tight line-clamp-2 hover:text-primary transition-colors cursor-pointer">
-                            {gig.title}
-                          </h3>
-
-                          {/* Skill Tags */}
-                          <div className="flex flex-wrap gap-1.5 mt-4">
-                            {gig.skills.map((skill, index) => (
-                              <span key={index} className="text-[9px] font-medium bg-neutral-100 dark:bg-neutral-900 border border-border text-neutral-600 dark:text-neutral-400 px-2 py-0.5">
-                                {skill}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between border-t border-border mt-6 pt-4">
-                          <div>
-                            <span className="text-[10px] text-neutral-500 uppercase tracking-wider font-semibold">Starting At</span>
-                            <p className="text-lg font-bold text-foreground font-serif">₦{gig.startingPrice}</p>
-                          </div>
-                          
-                          <button className="flex items-center gap-1 bg-foreground text-background dark:bg-neutral-900 dark:text-white border border-border px-4 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300">
-                            Book Gig
-                            <ArrowUpRight className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      </div>
+                        <Icon className="h-4 w-4 shrink-0" />
+                        <span>{cat.label}</span>
+                      </button>
                     );
                   })}
                 </div>
-              ) : (
-                <div className="text-center py-20 border border-dashed border-border bg-neutral-50 dark:bg-neutral-900">
-                  <HelpCircle className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-serif">No Gigs Found</h3>
-                  <p className="text-sm text-neutral-400 max-w-xs mx-auto mt-2">We couldn't find any student catalog offerings fitting that category or query.</p>
+
+                {/* Gigs List Column */}
+                <div className="lg:col-span-3">
+                  {filteredGigs.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredGigs.map((gig) => {
+                        const CategoryIcon = gig.icon;
+                        return (
+                          <div 
+                            key={gig.id} 
+                            className="group relative bg-card text-card-foreground border border-border p-5 transition-all duration-500 hover:shadow-xl hover:border-primary flex flex-col justify-between"
+                          >
+                            <div>
+                              {/* Banner background representation with Heart Bookmark overlay */}
+                              <div className={`h-40 w-full ${gig.imageBg} relative overflow-hidden mb-5 flex items-center justify-center`}>
+                                <CategoryIcon className="h-12 w-12 text-white/40 group-hover:scale-110 transition-transform duration-500" />
+                                <div className="absolute top-3 left-3 bg-background border border-border text-[9px] font-bold tracking-wider px-2 py-0.5 uppercase font-sans">
+                                  {gig.category}
+                                </div>
+                                
+                                {/* Heart shape outline bookmark */}
+                                <button className="absolute top-3 right-3 h-7 w-7 rounded-full bg-background/80 hover:bg-background border border-border flex items-center justify-center text-foreground hover:text-red-500 transition-colors z-20 cursor-pointer">
+                                  <svg className="h-4 w-4 fill-none stroke-current" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                  </svg>
+                                </button>
+                              </div>
+
+                              <div className="flex items-center gap-3 mb-4">
+                                <div className="h-9 w-9 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm font-serif">
+                                  {gig.avatar}
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="text-xs font-bold text-foreground">{gig.name}</h4>
+                                    <span className={`text-[7px] font-bold px-1.5 py-0.5 border ${
+                                      gig.rank === "Gold Pro"
+                                        ? "bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/20"
+                                        : gig.rank === "Silver"
+                                        ? "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20"
+                                        : "bg-orange-500/10 text-orange-800 dark:text-orange-400 border-orange-500/20"
+                                    }`}>
+                                      {gig.rank}
+                                    </span>
+                                  </div>
+                                  <p className="text-[9px] text-neutral-500 dark:text-neutral-400 flex items-center gap-1 mt-0.5 font-sans">
+                                    <MapPin className="h-3 w-3 shrink-0 text-primary" />
+                                    {gig.school}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <h3 className="font-serif text-sm font-semibold text-foreground leading-snug line-clamp-2 hover:text-primary transition-colors cursor-pointer">
+                                {gig.title}
+                              </h3>
+
+                              {/* Skill Tags */}
+                              <div className="flex flex-wrap gap-1 mt-4">
+                                {gig.skills.map((skill, index) => (
+                                  <span key={index} className="text-[8px] font-medium bg-neutral-100 dark:bg-neutral-900 border border-border text-neutral-600 dark:text-neutral-400 px-1.5 py-0.5 font-sans">
+                                    {skill}
+                                  </span>
+                                ))}
+                              </div>
+
+                              {/* Offers video consultations (Fiverr style) */}
+                              <p className="text-[9px] text-primary flex items-center gap-1 mt-3 font-semibold font-sans">
+                                <Camera className="h-3 w-3 shrink-0" />
+                                <span>Offers remote video consults</span>
+                              </p>
+                            </div>
+
+                            {/* Ratings & Price Tag footer context (Fiverr style) */}
+                            <div className="flex items-center justify-between border-t border-border mt-5 pt-4">
+                              <div className="flex items-center gap-1 text-[11px] font-bold text-primary font-sans">
+                                <Star className="h-3.5 w-3.5 fill-current" />
+                                <span>{gig.rating.toFixed(1)}</span>
+                                <span className="text-neutral-400 font-normal">({gig.reviews})</span>
+                              </div>
+                              
+                              <div className="text-right font-sans">
+                                <span className="text-[8px] text-neutral-400 uppercase tracking-wider font-semibold block">Starting At</span>
+                                <p className="text-sm font-bold text-foreground">₦{gig.startingPrice}</p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-20 border border-dashed border-border bg-neutral-50 dark:bg-neutral-900">
+                      <HelpCircle className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-serif">No Gigs Found</h3>
+                      <p className="text-sm text-neutral-400 max-w-xs mx-auto mt-2 font-sans">We couldn't find any student catalog offerings fitting that category or query.</p>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           )}
 
@@ -807,6 +822,61 @@ export default function Page() {
             </div>
           )}
 
+        </div>
+      </section>
+
+      {/* 3. VALUE PROPOSITION SECTION */}
+      <section id="value" className={`bg-secondary text-secondary-foreground py-16 px-6 lg:px-24 transition-all duration-500 ${isSearchActive ? "hidden opacity-0 pointer-events-none" : "opacity-100"}`}>
+        <div className="max-w-7xl mx-auto">
+          <ScrollAnimate variant="fade">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-secondary-foreground/20 pb-12 mb-12">
+              <div>
+                <span className="text-xs uppercase tracking-widest text-primary font-bold">Why KÓ WON Matters</span>
+                <h2 className="font-serif text-3xl md:text-5xl font-light mt-2">Redefining Affordable Excellence</h2>
+              </div>
+              <p className="max-w-md text-sm text-secondary-foreground/75 leading-relaxed">
+                We leverage verified university rosters to offer professional-grade work from highly ambitious students without the corporate agency price tag.
+              </p>
+            </div>
+          </ScrollAnimate>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <ScrollAnimate variant="slide-up" delay={0}>
+              <div className="space-y-4">
+                <div className="bg-primary/10 text-primary border border-primary/30 p-3 inline-block">
+                  <CheckCircle className="h-6 w-6" />
+                </div>
+                <h3 className="font-serif text-xl font-bold">Vetted Student Rosters</h3>
+                <p className="text-sm text-secondary-foreground/80 leading-relaxed">
+                  Every student freelancer must register with their official institutional credentials, ensuring trust and professional accountability.
+                </p>
+              </div>
+            </ScrollAnimate>
+            
+            <ScrollAnimate variant="slide-up" delay={150}>
+              <div className="space-y-4">
+                <div className="bg-primary/10 text-primary border border-primary/30 p-3 inline-block">
+                  <Zap className="h-6 w-6" />
+                </div>
+                <h3 className="font-serif text-xl font-bold">Guaranteed Affordability</h3>
+                <p className="text-sm text-secondary-foreground/80 leading-relaxed">
+                  True to our name (KÓ WON — *“It's Affordable”*), student services and crafts are structured without inflated administrative costs.
+                </p>
+              </div>
+            </ScrollAnimate>
+            
+            <ScrollAnimate variant="slide-up" delay={300}>
+              <div className="space-y-4">
+                <div className="bg-primary/10 text-primary border border-primary/30 p-3 inline-block">
+                  <Star className="h-6 w-6" />
+                </div>
+                <h3 className="font-serif text-xl font-bold">Direct Secure Escrow</h3>
+                <p className="text-sm text-secondary-foreground/80 leading-relaxed">
+                  Funds are held securely and only released when the client verifies and approves the final craft product or digital deliverable.
+                </p>
+              </div>
+            </ScrollAnimate>
+          </div>
         </div>
       </section>
 
