@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import ThemeToggle from "@/components/theme-toggle";
 import ScrollAnimate from "@/components/scroll-animate";
-import Logo from "@/components/logo";
 import { 
   Search, 
   MapPin, 
@@ -156,8 +155,24 @@ const PROJECTS_DATA = [
   }
 ];
 
+const PLACEHOLDERS = [
+  "Search Next.js developers...",
+  "Search bespoke traditional wear...",
+  "Search outdoor portrait photography...",
+  "Search calculus tutoring...",
+  "Search hardware laptop repairs..."
+];
+
 export default function Page() {
   const [activeTab, setActiveTab] = useState<"showcase" | "exchange">("showcase");
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIdx((prev) => (prev + 1) % PLACEHOLDERS.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -181,7 +196,7 @@ export default function Page() {
   });
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+    <div className="dark min-h-screen bg-background text-foreground flex flex-col font-sans">
       
       {/* JSON-LD Structured Schema Markup for SEO */}
       <script
@@ -207,7 +222,6 @@ export default function Page() {
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           {/* Brand Logotype */}
           <div className="flex items-center gap-3">
-            <Logo size={36} />
             <div className="flex items-center gap-2">
               <span className="font-serif text-3xl font-bold tracking-widest text-foreground hover:opacity-85 cursor-pointer">
                 KÓ WON
@@ -228,9 +242,8 @@ export default function Page() {
 
           {/* Action CTAs */}
           <div className="flex items-center gap-6">
-            <ThemeToggle />
             <Link 
-              href="/auth/login" 
+              href="/auth/login"
               className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground hover:text-primary transition-colors"
             >
               Log In
@@ -278,8 +291,8 @@ export default function Page() {
                 <span className="italic text-primary font-normal">Affordable Luxury.</span>
               </h1>
               
-              <p className="max-w-xl text-neutral-600 dark:text-neutral-400 text-lg leading-relaxed font-light mt-8">
-                Connecting skilled Nigerian students showing top-tier crafts and digital skills with businesses seeking high-end delivery at student-friendly price points.
+              <p className="max-w-md text-neutral-400 text-base leading-relaxed font-light mt-6">
+                Discover elite Nigerian student creators. Top-tier software dev, bespoke tailoring, photography, and tutoring, delivered at scale.
               </p>
             </div>
 
@@ -296,7 +309,7 @@ export default function Page() {
                 <Search className="h-5 w-5 text-neutral-400 mx-2" />
                 <input 
                   type="text" 
-                  placeholder="Search custom apparel, web development, photography..." 
+                  placeholder={PLACEHOLDERS[placeholderIdx]} 
                   className="w-full bg-transparent border-none outline-none text-sm text-foreground placeholder-neutral-400 px-1 py-2"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -769,7 +782,6 @@ export default function Page() {
           
           <div className="space-y-4">
             <div className="flex items-center gap-2.5">
-              <Logo size={32} />
               <h3 className="font-serif text-2xl text-white font-bold tracking-widest">KÓ WON</h3>
             </div>
             <p className="text-xs text-neutral-400 leading-relaxed">
