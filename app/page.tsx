@@ -290,10 +290,6 @@ export default function Page() {
                 Crafted Services. <br />
                 <span className="italic text-primary font-normal">Affordable Luxury.</span>
               </h1>
-              
-              <p className="max-w-md text-neutral-400 text-base leading-relaxed font-light mt-6">
-                Discover elite Nigerian student creators. Top-tier software dev, bespoke tailoring, photography, and tutoring, delivered at scale.
-              </p>
             </div>
 
             {/* Direct Search Bar (Elevates and animates width) */}
@@ -332,6 +328,69 @@ export default function Page() {
                 <button className="bg-primary hover:bg-foreground hover:text-background text-primary-foreground font-semibold px-6 py-2.5 text-xs uppercase tracking-wider transition-colors shrink-0">
                   Find Value
                 </button>
+              </div>
+            </div>
+
+            {/* Trending skill tags (collapses on search) */}
+            <div className={`transition-all duration-500 ease-in-out origin-top ${
+              isSearchActive 
+                ? "max-h-0 opacity-0 overflow-hidden mt-0" 
+                : "max-h-16 opacity-100 mt-2"
+            }`}>
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="text-neutral-500">Trending:</span>
+                {["Next.js", "Bespoke Senator", "Photoshoot", "Math Tutor"].map((tag) => (
+                  <button 
+                    key={tag}
+                    onClick={() => {
+                      setSearchQuery(tag);
+                      setIsSearchActive(true);
+                      document.getElementById("marketplace")?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className="px-2.5 py-1 bg-neutral-900 border border-border hover:border-primary hover:text-primary text-[10px] uppercase font-bold text-neutral-300 transition-all cursor-pointer"
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Upwork-style Interactive Category Cards Grid (collapses on search) */}
+            <div className={`transition-all duration-500 ease-in-out origin-top ${
+              isSearchActive 
+                ? "max-h-0 opacity-0 overflow-hidden mt-0" 
+                : "max-h-[300px] opacity-100 mt-6"
+            }`}>
+              <div className="grid grid-cols-2 gap-4 max-w-lg">
+                {[
+                  { name: "Code & Dev", count: "48 Talents", icon: Code, tags: "React, Next.js, APIs" },
+                  { name: "Fashion & Crafts", count: "62 Talents", icon: Scissors, tags: "Agbada, Crochet, Bags" },
+                  { name: "Visual Media", count: "35 Talents", icon: Camera, tags: "Reels, Portraits, Logo" },
+                  { name: "Academics", count: "29 Talents", icon: BookOpen, tags: "Math, Physics, Prep" }
+                ].map((cat) => {
+                  const Icon = cat.icon;
+                  return (
+                    <div 
+                      key={cat.name} 
+                      onClick={() => {
+                        setSelectedCategory(cat.name);
+                        document.getElementById("marketplace")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className="group p-4 bg-card border border-border/80 hover:border-primary hover:bg-neutral-900/50 transition-all duration-300 cursor-pointer flex flex-col justify-between h-28"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="p-1.5 bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <ArrowUpRight className="h-4 w-4 text-neutral-500 group-hover:text-primary transition-colors" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors">{cat.name}</h3>
+                        <p className="text-[9px] text-neutral-400 mt-1">{cat.count} • <span className="text-neutral-500 font-light">{cat.tags}</span></p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
