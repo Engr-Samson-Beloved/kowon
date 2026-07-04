@@ -18,8 +18,11 @@ import {
   Sparkles,
   Search,
   MapPin,
-  TrendingUp
+  TrendingUp,
+  Camera
 } from "lucide-react";
+import { useEffect } from "react";
+import { supabase } from "@/components/supabase-client";
 import ThemeToggle from "@/components/theme-toggle";
 import Logo from "@/components/logo";
 
@@ -83,6 +86,82 @@ const INITIAL_TENDERS = [
 export default function ClientDashboard() {
   const [collaborations, setCollaborations] = useState(INITIAL_COLLABORATIONS);
   const [tenders, setTenders] = useState(INITIAL_TENDERS);
+  
+  // Supabase Profile state
+  const [userProfile, setUserProfile] = useState<{
+    fullName: string;
+    email: string;
+    avatarUrl: string;
+    companyName: string;
+  } | null>(null);
+
+  const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserProfile({
+          fullName: user.user_metadata?.full_name || "Alpha Tech Solutions",
+          email: user.email || "",
+          avatarUrl: user.user_metadata?.avatar_url || "",
+          companyName: user.user_metadata?.company_name || "",
+        });
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert("You must be logged in to update your profile.");
+        return;
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const filePath = `avatars/${user.id}-${Date.now()}.${fileExt}`;
+
+      // Upload to the 'avatars' storage bucket
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        alert("Upload failed. Make sure you have created a public bucket named 'avatars' in your Supabase storage dashboard.\nError: " + uploadError.message);
+        return;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Save public URL in user metadata
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { avatar_url: publicUrl }
+      });
+
+      if (updateError) {
+        alert("Failed to update user profile metadata: " + updateError.message);
+        return;
+      }
+
+      setUserProfile(prev => prev ? { ...prev, avatarUrl: publicUrl } : null);
+      alert("🎉 Profile avatar updated successfully! The new image is active and optimized.");
+    } catch (err: any) {
+      console.error(err);
+      alert("An unexpected error occurred during upload: " + err.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
   
   // Financial Metrics
   const [lockedEscrow, setLockedEscrow] = useState(70000);
@@ -208,8 +287,45 @@ export default function ClientDashboard() {
 
           <div className="flex items-center gap-6">
             <div className="hidden md:flex items-center gap-2 text-xs text-neutral-500 font-medium">
-              <span>Alpha Tech Solutions</span>
+              <span>{userProfile?.companyName || userProfile?.fullName || "Alpha Tech Solutions"}</span>
             </div>
+
+            {/* Interactive Avatar Upload Container */}
+            <div className="relative group shrink-0">
+              <label className="cursor-pointer block relative h-9 w-9 rounded-full overflow-hidden border border-border group-hover:border-primary transition-all duration-300">
+                {isUploading ? (
+                  <div className="h-full w-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center">
+                    <span className="inline-block h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : userProfile?.avatarUrl ? (
+                  <img 
+                    src={userProfile.avatarUrl} 
+                    alt="Avatar" 
+                    className="h-full w-full object-cover" 
+                  />
+                ) : (
+                  <div className="h-full w-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase">
+                    {userProfile?.companyName 
+                      ? userProfile.companyName.split(" ").slice(0, 2).map(n => n[0]).join("") 
+                      : userProfile?.fullName 
+                      ? userProfile.fullName.split(" ").slice(0, 2).map(n => n[0]).join("") 
+                      : "CL"
+                    }
+                  </div>
+                )}
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleAvatarUpload} 
+                  className="hidden" 
+                  disabled={isUploading}
+                />
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <Camera className="h-3.5 w-3.5 text-white" />
+                </div>
+              </label>
+            </div>
+
             <ThemeToggle />
             <Link 
               href="/dashboard/inbox" 

@@ -281,7 +281,8 @@ export default function SignupPage() {
                 </Link>
               </div>
             ) : step === 1 ? (
-              <form onSubmit={handleNextStep} className="space-y-6">
+              <>
+                <form onSubmit={handleNextStep} className="space-y-6">
                 
                 {errorMsg && (
                   <div className="bg-red-500/10 border border-red-500/20 p-4 text-xs text-red-600 font-semibold flex items-center gap-2">
@@ -536,6 +537,7 @@ export default function SignupPage() {
                   </button>
                 </div>
               </div>
+              </>
             ) : (
               /* STEP 2: VERIFICATION OTP CODE */
               <form onSubmit={handleVerifyOTP} className="space-y-6 animate-fade-in">

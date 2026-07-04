@@ -14,7 +14,8 @@ import {
   EyeOff, 
   ChevronRight, 
   Sparkles, 
-  ShieldCheck 
+  ShieldCheck,
+  AlertCircle
 } from "lucide-react";
 
 export default function LoginPage() {
