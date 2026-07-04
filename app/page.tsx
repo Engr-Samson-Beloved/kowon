@@ -591,165 +591,85 @@ export default function Page() {
 
           {/* VIEW A: THE SHOWCASE (Fiverr style, Catalog of Gigs) */}
           {activeTab === "showcase" && (
-            <div className="space-y-8 animate-fade-in">
-              
-              {/* Personalized Greeting (Upwork & Fiverr style) */}
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                  <h2 className="font-serif text-3xl md:text-4xl font-light text-foreground">Welcome back, Samson Olabanji</h2>
-                  <p className="text-xs text-neutral-400 mt-1 font-sans">Explore recommended offers and trending projects across Nigerian campuses.</p>
-                </div>
-              </div>
-
-              {/* Recommended Brief Prompt Banner */}
-              <div className="bg-card border border-border p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-                    <Briefcase className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-sm">Post a project brief</h3>
-                    <p className="text-xs text-neutral-400 mt-0.5 font-sans">Get tailored offers and pitches from verified campus talents for your custom needs.</p>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => {
-                    setActiveTab("exchange");
-                  }}
-                  className="border border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-6 py-2.5 text-xs uppercase tracking-wider transition-all duration-300 cursor-pointer"
-                >
-                  Get started
-                </button>
-              </div>
-
-              {/* Showcase Grid Columns */}
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-                
-                {/* Vertical Categories List Sidebar (Fiverr style - hidden on mobile) */}
-                <div className="lg:col-span-1 space-y-2 hidden lg:block">
-                  <h3 className="text-[10px] uppercase tracking-widest text-primary font-bold mb-4 font-sans">Categories</h3>
-                  {[
-                    { name: "All", label: "Keep exploring", icon: Compass },
-                    { name: "Code & Dev", label: "Code & Dev", icon: Code },
-                    { name: "Fashion & Crafts", label: "Fashion & Crafts", icon: Scissors },
-                    { name: "Visual Media", label: "Visual Media", icon: Camera },
-                    { name: "Academics", label: "Academics & Study", icon: BookOpen }
-                  ].map((cat) => {
-                    const Icon = cat.icon;
+            <div>
+              {filteredGigs.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {filteredGigs.map((gig) => {
+                    const CategoryIcon = gig.icon;
                     return (
-                      <button
-                        key={cat.name}
-                        onClick={() => setSelectedCategory(cat.name)}
-                        className={`w-full flex items-center gap-3 px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-left border transition-all duration-300 cursor-pointer ${
-                          selectedCategory === cat.name
-                            ? "bg-primary text-primary-foreground border-primary font-bold"
-                            : "bg-card text-foreground border-border hover:border-primary"
-                        }`}
+                      <div 
+                        key={gig.id} 
+                        className="group relative bg-card text-card-foreground border border-border p-6 transition-all duration-500 hover:shadow-xl hover:border-primary flex flex-col justify-between"
                       >
-                        <Icon className="h-4 w-4 shrink-0" />
-                        <span>{cat.label}</span>
-                      </button>
+                        <div>
+                          {/* Banner background representation */}
+                          <div className={`h-40 w-full ${gig.imageBg} relative overflow-hidden mb-5 flex items-center justify-center`}>
+                            <CategoryIcon className="h-12 w-12 text-white/40 group-hover:scale-110 transition-transform duration-500" />
+                            <div className="absolute top-3 left-3 bg-background border border-border text-[9px] font-bold tracking-wider px-2 py-0.5 uppercase">
+                              {gig.category}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="h-10 w-10 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+                              {gig.avatar}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-sm font-bold text-foreground">{gig.name}</h4>
+                                <span className={`text-[8px] font-bold px-1.5 py-0.5 border ${
+                                  gig.rank === "Gold Pro"
+                                    ? "bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/20"
+                                    : gig.rank === "Silver"
+                                    ? "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20"
+                                    : "bg-orange-500/10 text-orange-800 dark:text-orange-400 border-orange-500/20"
+                                }`}>
+                                  {gig.rank}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-neutral-500 dark:text-neutral-400 flex items-center gap-1 mt-0.5">
+                                <MapPin className="h-3 w-3 shrink-0 text-primary" />
+                                {gig.school}
+                              </p>
+                            </div>
+                          </div>
+
+                          <h3 className="font-serif text-lg font-normal text-foreground leading-tight line-clamp-2 hover:text-primary transition-colors cursor-pointer">
+                            {gig.title}
+                          </h3>
+
+                          {/* Skill Tags */}
+                          <div className="flex flex-wrap gap-1.5 mt-4">
+                            {gig.skills.map((skill, index) => (
+                              <span key={index} className="text-[9px] font-medium bg-neutral-100 dark:bg-neutral-900 border border-border text-neutral-600 dark:text-neutral-400 px-2 py-0.5">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between border-t border-border mt-6 pt-4">
+                          <div>
+                            <span className="text-[10px] text-neutral-500 uppercase tracking-wider font-semibold">Starting At</span>
+                            <p className="text-lg font-bold text-foreground font-serif">₦{gig.startingPrice}</p>
+                          </div>
+                          
+                          <button className="flex items-center gap-1 bg-foreground text-background dark:bg-neutral-900 dark:text-white border border-border px-4 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300">
+                            Book Gig
+                            <ArrowUpRight className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
-
-                {/* Gigs List Column */}
-                <div className="lg:col-span-3">
-                  {filteredGigs.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {filteredGigs.map((gig) => {
-                        const CategoryIcon = gig.icon;
-                        return (
-                          <div 
-                            key={gig.id} 
-                            className="group relative bg-card text-card-foreground border border-border p-5 transition-all duration-500 hover:shadow-xl hover:border-primary flex flex-col justify-between"
-                          >
-                            <div>
-                              {/* Banner background representation with Heart Bookmark overlay */}
-                              <div className={`h-40 w-full ${gig.imageBg} relative overflow-hidden mb-5 flex items-center justify-center`}>
-                                <CategoryIcon className="h-12 w-12 text-white/40 group-hover:scale-110 transition-transform duration-500" />
-                                <div className="absolute top-3 left-3 bg-background border border-border text-[9px] font-bold tracking-wider px-2 py-0.5 uppercase font-sans">
-                                  {gig.category}
-                                </div>
-                                
-                                {/* Heart shape outline bookmark */}
-                                <button className="absolute top-3 right-3 h-7 w-7 rounded-full bg-background/80 hover:bg-background border border-border flex items-center justify-center text-foreground hover:text-red-500 transition-colors z-20 cursor-pointer">
-                                  <svg className="h-4 w-4 fill-none stroke-current" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                  </svg>
-                                </button>
-                              </div>
-
-                              <div className="flex items-center gap-3 mb-4">
-                                <div className="h-9 w-9 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm font-serif">
-                                  {gig.avatar}
-                                </div>
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <h4 className="text-xs font-bold text-foreground">{gig.name}</h4>
-                                    <span className={`text-[7px] font-bold px-1.5 py-0.5 border ${
-                                      gig.rank === "Gold Pro"
-                                        ? "bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/20"
-                                        : gig.rank === "Silver"
-                                        ? "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20"
-                                        : "bg-orange-500/10 text-orange-800 dark:text-orange-400 border-orange-500/20"
-                                    }`}>
-                                      {gig.rank}
-                                    </span>
-                                  </div>
-                                  <p className="text-[9px] text-neutral-500 dark:text-neutral-400 flex items-center gap-1 mt-0.5 font-sans">
-                                    <MapPin className="h-3 w-3 shrink-0 text-primary" />
-                                    {gig.school}
-                                  </p>
-                                </div>
-                              </div>
-
-                              <h3 className="font-serif text-sm font-semibold text-foreground leading-snug line-clamp-2 hover:text-primary transition-colors cursor-pointer">
-                                {gig.title}
-                              </h3>
-
-                              {/* Skill Tags */}
-                              <div className="flex flex-wrap gap-1 mt-4">
-                                {gig.skills.map((skill, index) => (
-                                  <span key={index} className="text-[8px] font-medium bg-neutral-100 dark:bg-neutral-900 border border-border text-neutral-600 dark:text-neutral-400 px-1.5 py-0.5 font-sans">
-                                    {skill}
-                                  </span>
-                                ))}
-                              </div>
-
-                              {/* Offers video consultations (Fiverr style) */}
-                              <p className="text-[9px] text-primary flex items-center gap-1 mt-3 font-semibold font-sans">
-                                <Camera className="h-3 w-3 shrink-0" />
-                                <span>Offers remote video consults</span>
-                              </p>
-                            </div>
-
-                            {/* Ratings & Price Tag footer context (Fiverr style) */}
-                            <div className="flex items-center justify-between border-t border-border mt-5 pt-4">
-                              <div className="flex items-center gap-1 text-[11px] font-bold text-primary font-sans">
-                                <Star className="h-3.5 w-3.5 fill-current" />
-                                <span>{gig.rating.toFixed(1)}</span>
-                                <span className="text-neutral-400 font-normal">({gig.reviews})</span>
-                              </div>
-                              
-                              <div className="text-right font-sans">
-                                <span className="text-[8px] text-neutral-400 uppercase tracking-wider font-semibold block">Starting At</span>
-                                <p className="text-sm font-bold text-foreground">₦{gig.startingPrice}</p>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="text-center py-20 border border-dashed border-border bg-neutral-50 dark:bg-neutral-900">
-                      <HelpCircle className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-serif">No Gigs Found</h3>
-                      <p className="text-sm text-neutral-400 max-w-xs mx-auto mt-2 font-sans">We couldn't find any student catalog offerings fitting that category or query.</p>
-                    </div>
-                  )}
+              ) : (
+                <div className="text-center py-20 border border-dashed border-border bg-neutral-50 dark:bg-neutral-900">
+                  <HelpCircle className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-serif">No Gigs Found</h3>
+                  <p className="text-sm text-neutral-400 max-w-xs mx-auto mt-2">We couldn't find any student catalog offerings fitting that category or query.</p>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
