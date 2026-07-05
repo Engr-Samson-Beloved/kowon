@@ -24,137 +24,28 @@ import {
   Zap,
   ArrowRight
 } from "lucide-react";
+import { supabase } from "@/components/supabase-client";
+import type { Gig, Project } from "@/lib/types";
 
-// Mock Data for Premium Student Freelancers (Gigs)
-const GIGS_DATA = [
-  {
-    id: 1,
-    name: "Tunde Opeyemi",
-    school: "University of Lagos (UNILAG)",
-    category: "Code & Dev",
-    title: "High-performance React & Next.js Landing Pages",
-    rating: 4.9,
-    reviews: 24,
-    startingPrice: "35,000",
-    imageBg: "bg-gradient-to-tr from-yellow-700 via-yellow-600 to-amber-900",
-    avatar: "TO",
-    icon: Code,
-    skills: ["React", "Next.js", "Tailwind", "SEO"],
-    rank: "Gold Pro"
-  },
-  {
-    id: 2,
-    name: "Chinwe Egwu",
-    school: "University of Ibadan (UI)",
-    category: "Fashion & Crafts",
-    title: "Bespoke Traditional Wear & Modern Agbada Design",
-    rating: 5.0,
-    reviews: 18,
-    startingPrice: "25,000",
-    imageBg: "bg-gradient-to-tr from-amber-700 via-amber-800 to-yellow-900",
-    avatar: "CE",
-    icon: Scissors,
-    skills: ["Traditional", "Modern Fit", "Embroidery"],
-    rank: "Silver"
-  },
-  {
-    id: 3,
-    name: "Aisha Mohammed",
-    school: "Obafemi Awolowo University (OAU)",
-    category: "Visual Media",
-    title: "On-Campus Creative Portraits & Brand Photoshoots",
-    rating: 4.8,
-    reviews: 32,
-    startingPrice: "15,000",
-    imageBg: "bg-gradient-to-tr from-yellow-950 via-yellow-800 to-amber-700",
-    avatar: "AM",
-    icon: Camera,
-    skills: ["Retouching", "Outdoor", "Event Portrait"],
-    rank: "Gold Pro"
-  },
-  {
-    id: 4,
-    name: "Bolaji Salako",
-    school: "University of Ilorin (UNILORIN)",
-    category: "Beauty & Style",
-    title: "Bridal Glam & Editorial Hair Styling Services",
-    rating: 4.9,
-    reviews: 29,
-    startingPrice: "18,000",
-    imageBg: "bg-gradient-to-tr from-amber-900 via-yellow-700 to-yellow-600",
-    avatar: "BS",
-    icon: Sparkles,
-    skills: ["Bridal Glam", "Natural Hair", "Makeup"],
-    rank: "Bronze"
-  },
-  {
-    id: 5,
-    name: "Emeka Kalu",
-    school: "Fed. University of Tech. Akure (FUTA)",
-    category: "Technical Services",
-    title: "PC Maintenance, Laptop Repair & OS Upgrades",
-    rating: 4.7,
-    reviews: 15,
-    startingPrice: "8,000",
-    imageBg: "bg-gradient-to-tr from-zinc-800 via-yellow-900 to-zinc-950",
-    avatar: "EK",
-    icon: Code,
-    skills: ["Hardware Repair", "OS Install", "Optimization"],
-    rank: "Bronze"
-  },
-  {
-    id: 6,
-    name: "Olamide Soyinka",
-    school: "University of Benin (UNIBEN)",
-    category: "Academics",
-    title: "Calculus, Physics & Engineering Mathematics Tutoring",
-    rating: 5.0,
-    reviews: 41,
-    startingPrice: "5,000 / hr",
-    imageBg: "bg-gradient-to-tr from-yellow-800 via-amber-950 to-yellow-700",
-    avatar: "OS",
-    icon: BookOpen,
-    skills: ["Calculus", "Physics", "Exam Prep"],
-    rank: "Silver"
-  }
-];
+const CATEGORY_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  "Code & Dev": Code,
+  "Fashion & Crafts": Scissors,
+  "Visual Media": Camera,
+  "Beauty & Style": Sparkles,
+  "Technical Services": Code,
+  "Academics": BookOpen,
+};
 
-// Mock Data for Active Client Projects (The Exchange / Bidding Board)
-const PROJECTS_DATA = [
-  {
-    id: 1,
-    clientName: "Alpha Tech Solutions",
-    title: "Corporate Website Redesign using Tailwind CSS",
-    budget: "120,000",
-    proposals: 14,
-    daysLeft: 5,
-    category: "Code & Dev",
-    schoolLimit: "Open to All Schools",
-    desc: "We need a clean, responsive 5-page marketing website. Must have portfolio galleries and contact forms."
-  },
-  {
-    id: 2,
-    clientName: "Tolu's Boutique",
-    title: "Product Videography for Instagram Launch",
-    budget: "45,000",
-    proposals: 8,
-    daysLeft: 2,
-    category: "Visual Media",
-    schoolLimit: "Lagos Only (On-Site)",
-    desc: "Looking for a student videographer to shoot 5 aesthetic product reels for a new fashion collection launch."
-  },
-  {
-    id: 3,
-    clientName: "Greenwood Academy",
-    title: "Senior High School Math Tutor Needed",
-    budget: "6,000 / hr",
-    proposals: 19,
-    daysLeft: 12,
-    category: "Academics",
-    schoolLimit: "Ibadan Only",
-    desc: "A Math student or tutor who can prepare students for WAEC examinations in algebra and geometry."
-  }
-];
+function getCategoryIcon(category: string) {
+  return CATEGORY_ICON_MAP[category] || HelpCircle;
+}
+
+function getInitials(name: string | null | undefined): string {
+  if (!name) return "??";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
 
 const PLACEHOLDERS = [
   "Search Next.js developers...",
@@ -196,25 +87,50 @@ export default function Page() {
 
     return () => clearTimeout(timer);
   }, [charIdx, isDeleting, placeholderIdx]);
+    const [gigs, setGigs] = useState<Gig[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const { data: gigsData } = await supabase
+        .from("gigs")
+        .select("*, artisan:profiles(id, full_name, school, avatar_url, rank, avg_rating, total_reviews, skills)")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      const { data: projectsData } = await supabase
+        .from("projects")
+        .select("*, client:profiles(id, full_name, company_name), proposals(count)")
+        .eq("status", "open")
+        .order("created_at", { ascending: false });
+
+      if (gigsData) setGigs(gigsData as any);
+      if (projectsData) setProjects(projectsData as any);
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
   const categories = ["All", "Code & Dev", "Fashion & Crafts", "Visual Media", "Beauty & Style", "Technical Services", "Academics"];
 
   // Filter logic
-  const filteredGigs = GIGS_DATA.filter(gig => {
+  const filteredGigs = gigs.filter(gig => {
     const matchesCategory = selectedCategory === "All" || gig.category === selectedCategory;
     const matchesSearch = gig.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          gig.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          gig.school.toLowerCase().includes(searchQuery.toLowerCase());
+                          (gig.artisan?.full_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (gig.artisan?.school || "").toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
-  const filteredProjects = PROJECTS_DATA.filter(project => {
+  const filteredProjects = projects.filter(project => {
     const matchesCategory = selectedCategory === "All" || project.category === selectedCategory;
     const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          project.desc.toLowerCase().includes(searchQuery.toLowerCase());
+                          project.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -558,7 +474,13 @@ export default function Page() {
               {filteredGigs.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {filteredGigs.map((gig) => {
-                    const CategoryIcon = gig.icon;
+                    const CategoryIcon = getCategoryIcon(gig.category);
+                    const initials = getInitials(gig.artisan?.full_name);
+                    const imageBg = "bg-gradient-to-tr from-neutral-800 to-neutral-900";
+                    const artisanName = gig.artisan?.full_name || "Artisan";
+                    const artisanSchool = gig.artisan?.school || "Campus";
+                    const artisanRank = gig.artisan?.rank || "Bronze";
+
                     return (
                       <div 
                         key={gig.id} 
@@ -566,44 +488,56 @@ export default function Page() {
                       >
                         <div>
                           {/* Banner background representation */}
-                          <div className={`h-40 w-full ${gig.imageBg} relative overflow-hidden mb-5 flex items-center justify-center`}>
-                            <CategoryIcon className="h-12 w-12 text-white/40 group-hover:scale-110 transition-transform duration-500" />
+                          <div className={`h-40 w-full ${imageBg} relative overflow-hidden mb-5 flex items-center justify-center`}>
+                            {gig.image_url ? (
+                              <img src={gig.image_url} alt={gig.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            ) : (
+                              <CategoryIcon className="h-12 w-12 text-white/40 group-hover:scale-110 transition-transform duration-500" />
+                            )}
                             <div className="absolute top-3 left-3 bg-background border border-border text-[9px] font-bold tracking-wider px-2 py-0.5 uppercase">
                               {gig.category}
                             </div>
                           </div>
 
                           <div className="flex items-center gap-3 mb-4">
-                            <div className="h-10 w-10 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-                              {gig.avatar}
-                            </div>
+                            {gig.artisan?.avatar_url ? (
+                              <img src={gig.artisan.avatar_url} alt={artisanName} className="h-10 w-10 object-cover rounded-none border border-border" />
+                            ) : (
+                              <div className="h-10 w-10 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+                                {initials}
+                              </div>
+                            )}
                             <div>
                               <div className="flex items-center gap-2">
-                                <h4 className="text-sm font-bold text-foreground">{gig.name}</h4>
+                                <Link href={`/profile/${gig.artisan_id}`} className="text-sm font-bold text-foreground hover:text-primary transition-colors">
+                                  {artisanName}
+                                </Link>
                                 <span className={`text-[8px] font-bold px-1.5 py-0.5 border ${
-                                  gig.rank === "Gold Pro"
+                                  artisanRank === "Gold Pro"
                                     ? "bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/20"
-                                    : gig.rank === "Silver"
+                                    : artisanRank === "Silver"
                                     ? "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20"
                                     : "bg-orange-500/10 text-orange-800 dark:text-orange-400 border-orange-500/20"
                                 }`}>
-                                  {gig.rank}
+                                  {artisanRank}
                                 </span>
                               </div>
                               <p className="text-[10px] text-neutral-500 dark:text-neutral-400 flex items-center gap-1 mt-0.5">
                                 <MapPin className="h-3 w-3 shrink-0 text-primary" />
-                                {gig.school}
+                                {artisanSchool}
                               </p>
                             </div>
                           </div>
 
-                          <h3 className="font-serif text-lg font-normal text-foreground leading-tight line-clamp-2 hover:text-primary transition-colors cursor-pointer">
-                            {gig.title}
-                          </h3>
+                          <Link href={`/gig/${gig.id}`}>
+                            <h3 className="font-serif text-lg font-normal text-foreground leading-tight line-clamp-2 hover:text-primary transition-colors cursor-pointer">
+                              {gig.title}
+                            </h3>
+                          </Link>
 
                           {/* Skill Tags */}
                           <div className="flex flex-wrap gap-1.5 mt-4">
-                            {gig.skills.map((skill, index) => (
+                            {(gig.skills || []).map((skill, index) => (
                               <span key={index} className="text-[9px] font-medium bg-neutral-100 dark:bg-neutral-900 border border-border text-neutral-600 dark:text-neutral-400 px-2 py-0.5">
                                 {skill}
                               </span>
@@ -614,13 +548,13 @@ export default function Page() {
                         <div className="flex items-center justify-between border-t border-border mt-6 pt-4">
                           <div>
                             <span className="text-[10px] text-neutral-500 uppercase tracking-wider font-semibold">Starting At</span>
-                            <p className="text-lg font-bold text-foreground font-serif">₦{gig.startingPrice}</p>
+                            <p className="text-lg font-bold text-foreground font-serif">₦{gig.starting_price.toLocaleString()}</p>
                           </div>
                           
-                          <button className="flex items-center gap-1 bg-foreground text-background dark:bg-neutral-900 dark:text-white border border-border px-4 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300">
+                          <Link href={`/gig/${gig.id}`} className="flex items-center gap-1 bg-foreground text-background dark:bg-neutral-900 dark:text-white border border-border px-4 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300">
                             Book Gig
                             <ArrowUpRight className="h-3.5 w-3.5" />
-                          </button>
+                          </Link>
                         </div>
                       </div>
                     );
@@ -640,49 +574,60 @@ export default function Page() {
           {activeTab === "exchange" && (
             <div className="space-y-6">
               {filteredProjects.length > 0 ? (
-                filteredProjects.map((project) => (
-                  <div 
-                    key={project.id} 
-                    className="border border-border bg-card text-card-foreground p-6 lg:p-8 hover:border-primary transition-all duration-300 flex flex-col lg:flex-row lg:items-center justify-between gap-6"
-                  >
-                    <div className="space-y-3 max-w-2xl">
-                      <div className="flex items-center gap-3">
-                        <span className="bg-primary/10 text-primary border border-primary/30 text-[9px] font-bold tracking-wider uppercase px-2 py-0.5">
-                          {project.category}
-                        </span>
-                        <span className="text-[10px] text-neutral-400 font-semibold tracking-wider uppercase">
-                          {project.schoolLimit}
-                        </span>
+                filteredProjects.map((project) => {
+                  const clientName = project.client?.company_name || project.client?.full_name || "Client";
+                  const proposalsCount = Array.isArray(project.proposals)
+                    ? project.proposals.length > 0 && typeof project.proposals[0] === "object" && "count" in project.proposals[0]
+                      ? (project.proposals[0] as { count: number }).count
+                      : project.proposals.length
+                    : 0;
+
+                  return (
+                    <div 
+                      key={project.id} 
+                      className="border border-border bg-card text-card-foreground p-6 lg:p-8 hover:border-primary transition-all duration-300 flex flex-col lg:flex-row lg:items-center justify-between gap-6"
+                    >
+                      <div className="space-y-3 max-w-2xl">
+                        <div className="flex items-center gap-3">
+                          <span className="bg-primary/10 text-primary border border-primary/30 text-[9px] font-bold tracking-wider uppercase px-2 py-0.5">
+                            {project.category}
+                          </span>
+                          <span className="text-[10px] text-neutral-400 font-semibold tracking-wider uppercase">
+                            {project.school_limit}
+                          </span>
+                        </div>
+                        
+                        <Link href={`/project/${project.id}`}>
+                          <h3 className="font-serif text-xl font-bold hover:text-primary transition-colors cursor-pointer">
+                            {project.title}
+                          </h3>
+                        </Link>
+                        
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed font-light line-clamp-3">
+                          {project.description}
+                        </p>
+                        
+                        <div className="flex items-center gap-4 text-xs text-neutral-400">
+                          <span>Posted by: <Link href={`/profile/${project.client_id}`} className="text-foreground hover:text-primary font-bold transition-colors">{clientName}</Link></span>
+                          <span>•</span>
+                          <span>{project.deadline_days} days left to apply</span>
+                        </div>
                       </div>
-                      
-                      <h3 className="font-serif text-xl font-bold hover:text-primary transition-colors cursor-pointer">
-                        {project.title}
-                      </h3>
-                      
-                      <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed font-light">
-                        {project.desc}
-                      </p>
-                      
-                      <div className="flex items-center gap-4 text-xs text-neutral-400">
-                        <span>Posted by: <strong className="text-foreground">{project.clientName}</strong></span>
-                        <span>•</span>
-                        <span>{project.daysLeft} days left to apply</span>
+
+                      <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center border-t lg:border-t-0 border-border lg:border-l lg:pl-8 pt-4 lg:pt-0 gap-4 shrink-0 min-w-[200px]">
+                        <div className="text-left lg:text-right">
+                          <span className="text-[10px] text-neutral-500 uppercase tracking-wider font-semibold">Budget</span>
+                          <p className="text-2xl font-serif font-bold text-foreground">₦{project.budget.toLocaleString()}</p>
+                          <p className="text-[10px] text-neutral-400 mt-0.5">{proposalsCount} proposal{proposalsCount !== 1 ? "s" : ""} submitted</p>
+                        </div>
+
+                        <Link href={`/project/${project.id}`} className="bg-primary text-primary-foreground font-semibold uppercase text-xs tracking-wider px-6 py-3 hover:bg-foreground hover:text-background transition-all duration-300">
+                          Pitch Proposal
+                        </Link>
                       </div>
                     </div>
-
-                    <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center border-t lg:border-t-0 border-border lg:border-l lg:pl-8 pt-4 lg:pt-0 gap-4 shrink-0 min-w-[200px]">
-                      <div className="text-left lg:text-right">
-                        <span className="text-[10px] text-neutral-500 uppercase tracking-wider font-semibold">Budget</span>
-                        <p className="text-2xl font-serif font-bold text-foreground">₦{project.budget}</p>
-                        <p className="text-[10px] text-neutral-400 mt-0.5">{project.proposals} proposals submitted</p>
-                      </div>
-
-                      <button className="bg-primary text-primary-foreground font-semibold uppercase text-xs tracking-wider px-6 py-3 hover:bg-foreground hover:text-background transition-all duration-300">
-                        Pitch Proposal
-                      </button>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="text-center py-20 border border-dashed border-border bg-card text-card-foreground">
                   <HelpCircle className="h-12 w-12 text-neutral-400 mx-auto mb-4" />

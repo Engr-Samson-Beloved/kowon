@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { 
   TrendingUp, 
@@ -21,78 +21,171 @@ import {
   Code,
   AlertCircle,
   Camera,
-  ShoppingBag
+  ShoppingBag,
+  Loader2
 } from "lucide-react";
 import { supabase } from "@/components/supabase-client";
 import Navbar from "@/components/navbar";
+import type { Profile, Gig, Product, Proposal, Order } from "@/lib/types";
 
-// Mock Initial Showcase Gigs
-const INITIAL_ARTISAN_GIGS = [
-  { id: 1, title: "Custom Next.js & React Landing Page", price: "35,000", category: "Code & Dev", icon: Code },
-  { id: 2, title: "Modern Ankara Senator Style Suit", price: "25,000", category: "Fashion & Crafts", icon: Scissors }
-];
+// Helper: pick icon for a category string
+function categoryIcon(cat: string) {
+  if (cat.toLowerCase().includes("code") || cat.toLowerCase().includes("dev")) return Code;
+  return Scissors;
+}
 
-// Mock Initial Campus Products
-const INITIAL_ARTISAN_PRODUCTS = [
-  { id: 1, title: "Bespoke Hand-Crocheted Vintage Tote Bag", price: "18,000", category: "Fashion & Crafts", instock: 3 }
-];
-
-// Mock Pitched Proposals
-const INITIAL_PITCHES = [
-  { id: 1, title: "Tailoring: Custom Traditional Blazer", client: "Emeka Okoye", bid: "30,000", status: "Awaiting Review", date: "June 25, 2026" },
-  { id: 2, title: "Web Dev: Instagram Shop Integration", client: "Boutique Hub", bid: "45,000", status: "Accepted (Funding Locked)", date: "June 24, 2026" }
-];
+// Financials shape returned by RPC
+interface ArtisanFinancials {
+  available_earnings: number;
+  locked_escrow: number;
+  total_completed_earnings: number;
+}
 
 export default function ArtisanDashboard() {
   const [activeSubTab, setActiveSubTab] = useState<"showcase" | "products" | "pitches">("showcase");
-  const [hasSubscription, setHasSubscription] = useState(false);
-  const [artisanRank, setArtisanRank] = useState<"Bronze" | "Gold Pro">("Bronze");
-  const [gigs, setGigs] = useState(INITIAL_ARTISAN_GIGS);
-  const [products, setProducts] = useState(INITIAL_ARTISAN_PRODUCTS);
-  const [pitches] = useState(INITIAL_PITCHES);
-  
-  // Supabase Profile state
-  const [userProfile, setUserProfile] = useState<{
-    fullName: string;
-    school: string;
-    email: string;
-    avatarUrl: string;
-  } | null>(null);
 
+  // Auth + profile
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<Profile | null>(null);
+  const [pageLoading, setPageLoading] = useState(true);
+
+  // Data lists
+  const [gigs, setGigs] = useState<Gig[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [pitches, setPitches] = useState<(Proposal & { project?: { title: string; budget: number; client?: { full_name: string } } })[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  // Financials
+  const [financials, setFinancials] = useState<ArtisanFinancials>({
+    available_earnings: 0,
+    locked_escrow: 0,
+    total_completed_earnings: 0,
+  });
+
+  // Avatar upload
   const [isUploading, setIsUploading] = useState(false);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setArtisanRank((user.user_metadata?.rank as any) || "Bronze");
-        setHasSubscription(user.user_metadata?.hasSubscription || false);
-        setUserProfile({
-          fullName: user.user_metadata?.full_name || "Samuel Alabi",
-          school: user.user_metadata?.school || "University of Lagos (UNILAG)",
-          email: user.email || "",
-          avatarUrl: user.user_metadata?.avatar_url || "",
-        });
-      }
-    };
-    fetchUser();
+  // Goal tracker
+  const [goalName, setGoalName] = useState("School Tuition fees");
+  const [goalTarget, setGoalTarget] = useState("150000");
+  const [isEditingGoal, setIsEditingGoal] = useState(false);
+
+  // Add gig form
+  const [newGigTitle, setNewGigTitle] = useState("");
+  const [newGigPrice, setNewGigPrice] = useState("");
+  const [newGigCategory, setNewGigCategory] = useState("Code & Dev");
+  const [isAddingGig, setIsAddingGig] = useState(false);
+  const [isSavingGig, setIsSavingGig] = useState(false);
+
+  // Add product form
+  const [newProductTitle, setNewProductTitle] = useState("");
+  const [newProductPrice, setNewProductPrice] = useState("");
+  const [newProductStock, setNewProductStock] = useState("");
+  const [newProductCategory, setNewProductCategory] = useState("Fashion & Crafts");
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
+
+  // ─── Fetch helpers ─────────────────────────────────
+  const fetchGigs = useCallback(async (uid: string) => {
+    const { data } = await supabase
+      .from("gigs")
+      .select("*")
+      .eq("artisan_id", uid)
+      .order("created_at", { ascending: false });
+    if (data) setGigs(data as Gig[]);
   }, []);
 
+  const fetchProducts = useCallback(async (uid: string) => {
+    const { data } = await supabase
+      .from("products")
+      .select("*")
+      .eq("artisan_id", uid)
+      .order("created_at", { ascending: false });
+    if (data) setProducts(data as Product[]);
+  }, []);
+
+  const fetchPitches = useCallback(async (uid: string) => {
+    const { data } = await supabase
+      .from("proposals")
+      .select("*, project:projects(title, budget, client:profiles(full_name))")
+      .eq("artisan_id", uid)
+      .order("created_at", { ascending: false });
+    if (data) setPitches(data as any);
+  }, []);
+
+  const fetchOrders = useCallback(async (uid: string) => {
+    const { data } = await supabase
+      .from("orders")
+      .select("*, client:profiles!orders_client_id_fkey(full_name, company_name)")
+      .eq("artisan_id", uid)
+      .neq("order_status", "cancelled")
+      .order("created_at", { ascending: false });
+    if (data) setOrders(data as Order[]);
+  }, []);
+
+  const fetchFinancials = useCallback(async (uid: string) => {
+    const { data } = await supabase.rpc("get_artisan_financials", { uid });
+    if (data) {
+      setFinancials({
+        available_earnings: data.available_earnings ?? 0,
+        locked_escrow: data.locked_escrow ?? 0,
+        total_completed_earnings: data.total_completed_earnings ?? 0,
+      });
+    }
+  }, []);
+
+  // ─── Initial load ──────────────────────────────────
+  useEffect(() => {
+    const init = async () => {
+      setPageLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setPageLoading(false); return; }
+
+      setUserId(user.id);
+
+      // Fetch profile from profiles table
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profile) setUserProfile(profile as Profile);
+
+      // Parallel data fetches
+      await Promise.all([
+        fetchGigs(user.id),
+        fetchProducts(user.id),
+        fetchPitches(user.id),
+        fetchOrders(user.id),
+        fetchFinancials(user.id),
+      ]);
+
+      setPageLoading(false);
+    };
+
+    init();
+  }, [fetchGigs, fetchProducts, fetchPitches, fetchOrders, fetchFinancials]);
+
+  // ─── Derived state ─────────────────────────────────
+  const artisanRank = userProfile?.rank || "Bronze";
+  const hasSubscription = userProfile?.is_subscribed || false;
+  const { available_earnings: availableEarnings, locked_escrow: lockedEscrow, total_completed_earnings: totalCompletedEarnings } = financials;
+  const progressPercent = Math.min(
+    Math.round(((availableEarnings + lockedEscrow + totalCompletedEarnings) / parseFloat(goalTarget || "1")) * 100),
+    100
+  );
+
+  // ─── Avatar upload ─────────────────────────────────
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !userId) return;
 
     setIsUploading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        alert("You must be logged in to update your profile.");
-        return;
-      }
-
       const fileExt = file.name.split('.').pop();
-      const filePath = `avatars/${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${userId}-${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
@@ -107,16 +200,18 @@ export default function ArtisanDashboard() {
         .from('avatars')
         .getPublicUrl(filePath);
 
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: { avatar_url: publicUrl }
-      });
+      // Update profiles table
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl })
+        .eq("id", userId);
 
       if (updateError) {
-        alert("Failed to update user profile metadata: " + updateError.message);
+        alert("Failed to update profile avatar: " + updateError.message);
         return;
       }
 
-      setUserProfile(prev => prev ? { ...prev, avatarUrl: publicUrl } : null);
+      setUserProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
       alert("🎉 Profile avatar updated successfully! The new image is active and optimized.");
     } catch (err: any) {
       console.error(err);
@@ -125,67 +220,98 @@ export default function ArtisanDashboard() {
       setIsUploading(false);
     }
   };
-  
-  // Custom goal state
-  const [goalName, setGoalName] = useState("School Tuition fees");
-  const [goalTarget, setGoalTarget] = useState("150000");
-  const [isEditingGoal, setIsEditingGoal] = useState(false);
-  
-  // Add new Gig state
-  const [newGigTitle, setNewGigTitle] = useState("");
-  const [newGigPrice, setNewGigPrice] = useState("");
-  const [newGigCategory, setNewGigCategory] = useState("Code & Dev");
-  const [isAddingGig, setIsAddingGig] = useState(false);
 
-  // Add new Product state
-  const [newProductTitle, setNewProductTitle] = useState("");
-  const [newProductPrice, setNewProductPrice] = useState("");
-  const [newProductStock, setNewProductStock] = useState("");
-  const [newProductCategory, setNewProductCategory] = useState("Fashion & Crafts");
-  const [isAddingProduct, setIsAddingProduct] = useState(false);
-
-  // Financial values
-  const availableEarnings = 28000;
-  const lockedEscrow = 45000;
-  const totalCompletedEarnings = 120000;
-  const progressPercent = Math.min(Math.round(((availableEarnings + lockedEscrow + totalCompletedEarnings) / parseFloat(goalTarget || "1")) * 100), 100);
-
-  const handleAddGig = (e: React.FormEvent) => {
+  // ─── Add Gig ───────────────────────────────────────
+  const handleAddGig = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newGigTitle || !newGigPrice) return;
-    
-    const newGig = {
-      id: gigs.length + 1,
+    if (!newGigTitle || !newGigPrice || !userId) return;
+
+    setIsSavingGig(true);
+    const { error } = await supabase.from("gigs").insert({
+      artisan_id: userId,
       title: newGigTitle,
-      price: newGigPrice,
+      description: "",
       category: newGigCategory,
-      icon: newGigCategory === "Code & Dev" ? Code : Scissors
-    };
-    
-    setGigs([newGig, ...gigs]);
+      starting_price: parseFloat(newGigPrice),
+      delivery_days: 3,
+      skills: [],
+    });
+
+    if (error) {
+      alert("Failed to create gig: " + error.message);
+      setIsSavingGig(false);
+      return;
+    }
+
+    await fetchGigs(userId);
     setNewGigTitle("");
     setNewGigPrice("");
     setIsAddingGig(false);
+    setIsSavingGig(false);
   };
 
-  const handleAddProduct = (e: React.FormEvent) => {
+  // ─── Add Product ───────────────────────────────────
+  const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newProductTitle || !newProductPrice) return;
+    if (!newProductTitle || !newProductPrice || !userId) return;
 
-    const newProduct = {
-      id: products.length + 1,
+    setIsSavingProduct(true);
+    const { error } = await supabase.from("products").insert({
+      artisan_id: userId,
       title: newProductTitle,
-      price: newProductPrice,
+      description: "",
       category: newProductCategory,
-      instock: parseInt(newProductStock) || 1
-    };
+      price: parseFloat(newProductPrice),
+      in_stock: parseInt(newProductStock) || 1,
+    });
 
-    setProducts([newProduct, ...products]);
+    if (error) {
+      alert("Failed to create product: " + error.message);
+      setIsSavingProduct(false);
+      return;
+    }
+
+    await fetchProducts(userId);
     setNewProductTitle("");
     setNewProductPrice("");
     setNewProductStock("");
     setIsAddingProduct(false);
+    setIsSavingProduct(false);
   };
+
+  // ─── Subscription toggle (updates profiles table) ──
+  const handleSubscribe = async () => {
+    if (!userId) return;
+    await supabase
+      .from("profiles")
+      .update({ is_subscribed: true, rank: "Gold Pro" })
+      .eq("id", userId);
+    setUserProfile(prev => prev ? { ...prev, is_subscribed: true, rank: "Gold Pro" } : null);
+  };
+
+  const handleCancelSubscription = async () => {
+    if (!userId) return;
+    await supabase
+      .from("profiles")
+      .update({ is_subscribed: false, rank: "Bronze" })
+      .eq("id", userId);
+    setUserProfile(prev => prev ? { ...prev, is_subscribed: false, rank: "Bronze" } : null);
+  };
+
+  // ─── Loading state ─────────────────────────────────
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="h-8 w-8 text-primary animate-spin" />
+            <span className="text-xs text-neutral-400 uppercase tracking-wider font-bold">Loading Workspace…</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
@@ -207,18 +333,18 @@ export default function ArtisanDashboard() {
                   <div className="h-full w-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center">
                     <span className="inline-block h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                   </div>
-                ) : userProfile?.avatarUrl ? (
-                  <img src={userProfile.avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                ) : userProfile?.avatar_url ? (
+                  <img src={userProfile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
                 ) : (
                   <div className="h-full w-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm uppercase">
-                    {userProfile?.fullName ? userProfile.fullName.split(" ").slice(0, 2).map(n => n[0]).join("") : "SA"}
+                    {userProfile?.full_name ? userProfile.full_name.split(" ").slice(0, 2).map(n => n[0]).join("") : "SA"}
                   </div>
                 )}
                 <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" disabled={isUploading} />
               </label>
               <div>
-                <h3 className="text-sm font-bold text-foreground">{userProfile?.fullName || "Samuel Alabi"}</h3>
-                <p className="text-[10px] text-neutral-400 font-sans">{userProfile?.school || "University of Lagos (UNILAG)"}</p>
+                <h3 className="text-sm font-bold text-foreground">{userProfile?.full_name || "Artisan"}</h3>
+                <p className="text-[10px] text-neutral-400 font-sans">{userProfile?.school || "—"}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="bg-primary/20 text-primary border border-primary/30 text-[8px] uppercase font-bold px-2 py-0.5 tracking-wider">
                     Artisan Workspace
@@ -342,18 +468,18 @@ export default function ArtisanDashboard() {
             </div>
 
             <div className="space-y-4">
-              {artisanRank === "Bronze" ? (
+              {artisanRank !== "Gold Pro" ? (
                 <>
                   <div className="space-y-2">
                     <h4 className="text-xs font-semibold text-neutral-400">Path to Silver Badge:</h4>
                     <div className="text-[11px] space-y-1 text-neutral-500">
                       <div className="flex justify-between">
                         <span>Completed Jobs</span>
-                        <span className="font-semibold text-foreground">2 / 5</span>
+                        <span className="font-semibold text-foreground">{userProfile?.completed_jobs ?? 0} / 5</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Rating Average</span>
-                        <span className="font-semibold text-foreground">4.8 / 4.5</span>
+                        <span className="font-semibold text-foreground">{userProfile?.avg_rating?.toFixed(1) ?? "0.0"} / 4.5</span>
                       </div>
                     </div>
                   </div>
@@ -370,10 +496,7 @@ export default function ArtisanDashboard() {
                     </div>
                     <button 
                       type="button"
-                      onClick={() => {
-                        setHasSubscription(true);
-                        setArtisanRank("Gold Pro");
-                      }}
+                      onClick={handleSubscribe}
                       className="w-full bg-primary text-primary-foreground text-xs uppercase tracking-wider font-bold py-2.5 hover:bg-foreground hover:text-background transition-colors cursor-pointer"
                     >
                       Subscribe & Boost Rank
@@ -393,10 +516,7 @@ export default function ArtisanDashboard() {
                   </div>
                   <button 
                     type="button"
-                    onClick={() => {
-                      setHasSubscription(false);
-                      setArtisanRank("Bronze");
-                    }}
+                    onClick={handleCancelSubscription}
                     className="w-full border border-border hover:border-red-500 hover:text-red-500 text-xs uppercase tracking-wider font-semibold py-2.5 transition-colors cursor-pointer"
                   >
                     Cancel Subscription
@@ -417,20 +537,40 @@ export default function ArtisanDashboard() {
               <Layers className="h-6 w-6 text-primary shrink-0" />
               Active Contracts
             </h2>
-            <div className="bg-neutral-900/30 p-6 space-y-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground">React Web Redesign Layout</h3>
-                  <p className="text-[10px] text-neutral-400 mt-0.5">Client: Alpha Tech Solutions • Budget: ₦45,000</p>
-                </div>
-                <span className="bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[9px] uppercase font-bold px-2 py-0.5">
-                  Review Pending
-                </span>
+
+            {orders.length === 0 ? (
+              <div className="bg-neutral-900/30 p-6">
+                <p className="text-xs text-neutral-500 text-center">No active contracts yet. Land your first gig to get started.</p>
               </div>
-              <p className="text-xs text-neutral-500 leading-relaxed font-light">
-                Deliverable draft submitted. The client has 3 days to review escrow milestones or request revisions.
-              </p>
-            </div>
+            ) : (
+              orders.filter(o => o.order_status !== "completed").map((order) => (
+                <div key={order.id} className="bg-neutral-900/30 p-6 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-sm font-semibold text-foreground">{order.title}</h3>
+                      <p className="text-[10px] text-neutral-400 mt-0.5">
+                        Client: {order.client?.full_name || order.client?.company_name || "—"} • Budget: ₦{order.amount.toLocaleString()}
+                      </p>
+                    </div>
+                    <span className={`text-[9px] uppercase font-bold px-2 py-0.5 border ${
+                      order.order_status === "delivered"
+                        ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                        : order.order_status === "revision"
+                        ? "bg-red-500/10 text-red-600 border-red-500/20"
+                        : "bg-primary/10 text-primary border-primary/20"
+                    }`}>
+                      {order.order_status === "in_progress" ? "In Progress" 
+                        : order.order_status === "delivered" ? "Review Pending"
+                        : order.order_status === "revision" ? "Revision Requested"
+                        : order.order_status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-500 leading-relaxed font-light">
+                    {order.milestone || "Milestone details will appear here once set by the client."}
+                  </p>
+                </div>
+              ))
+            )}
           </div>
 
           {/* Section B: Listings Tab Navigation */}
@@ -519,7 +659,12 @@ export default function ArtisanDashboard() {
                     </select>
                   </div>
                 </div>
-                <button type="submit" className="bg-primary text-primary-foreground text-xs uppercase tracking-wider font-bold px-6 py-2 hover:bg-foreground hover:text-background transition-colors cursor-pointer">
+                <button 
+                  type="submit" 
+                  disabled={isSavingGig}
+                  className="bg-primary text-primary-foreground text-xs uppercase tracking-wider font-bold px-6 py-2 hover:bg-foreground hover:text-background transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSavingGig && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   Save Service Gig
                 </button>
               </form>
@@ -564,7 +709,12 @@ export default function ArtisanDashboard() {
                     />
                   </div>
                 </div>
-                <button type="submit" className="bg-primary text-primary-foreground text-xs uppercase tracking-wider font-bold px-6 py-2 hover:bg-foreground hover:text-background transition-colors cursor-pointer">
+                <button 
+                  type="submit" 
+                  disabled={isSavingProduct}
+                  className="bg-primary text-primary-foreground text-xs uppercase tracking-wider font-bold px-6 py-2 hover:bg-foreground hover:text-background transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSavingProduct && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   Save Product
                 </button>
               </form>
@@ -573,62 +723,88 @@ export default function ArtisanDashboard() {
             {/* Sub-tab 1: Gigs List (Borderless Design) */}
             {activeSubTab === "showcase" && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {gigs.map((gig) => {
-                  const Icon = gig.icon;
-                  return (
-                    <div key={gig.id} className="bg-neutral-900/10 hover:bg-neutral-900/30 p-5 flex flex-col justify-between h-36 transition-all duration-300">
-                      <div>
-                        <div className="flex justify-between items-start">
-                          <span className="text-[8px] uppercase tracking-wider text-neutral-500 font-sans">{gig.category}</span>
-                          <span className="text-xs font-bold font-serif text-primary">₦{parseFloat(gig.price).toLocaleString()}</span>
+                {gigs.length === 0 ? (
+                  <div className="col-span-full bg-neutral-900/10 p-8 text-center">
+                    <p className="text-xs text-neutral-500">No gigs listed yet. Click "Add Gig" to create your first service listing.</p>
+                  </div>
+                ) : (
+                  gigs.map((gig) => {
+                    const Icon = categoryIcon(gig.category);
+                    return (
+                      <div key={gig.id} className="bg-neutral-900/10 hover:bg-neutral-900/30 p-5 flex flex-col justify-between h-36 transition-all duration-300">
+                        <div>
+                          <div className="flex justify-between items-start">
+                            <span className="text-[8px] uppercase tracking-wider text-neutral-500 font-sans">{gig.category}</span>
+                            <span className="text-xs font-bold font-serif text-primary">₦{gig.starting_price.toLocaleString()}</span>
+                          </div>
+                          <h4 className="font-serif text-sm font-semibold text-foreground mt-2 leading-snug">{gig.title}</h4>
                         </div>
-                        <h4 className="font-serif text-sm font-semibold text-foreground mt-2 leading-snug">{gig.title}</h4>
+                        <div className="flex justify-between items-center text-[9px] text-neutral-500 border-t border-border/20 pt-2.5 mt-4">
+                          <span>Standard Delivery: {gig.delivery_days} days</span>
+                          <span className="text-primary hover:underline cursor-pointer">Edit Gig</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between items-center text-[9px] text-neutral-500 border-t border-border/20 pt-2.5 mt-4">
-                        <span>Standard Delivery: 3 days</span>
-                        <span className="text-primary hover:underline cursor-pointer">Edit Gig</span>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
             )}
 
             {/* Sub-tab 2: Products List (Borderless Design) */}
             {activeSubTab === "products" && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {products.map((prod) => (
-                  <div key={prod.id} className="bg-neutral-900/10 hover:bg-neutral-900/30 p-5 flex flex-col justify-between h-36 transition-all duration-300">
-                    <div>
-                      <div className="flex justify-between items-start">
-                        <span className="text-[8px] uppercase tracking-wider text-neutral-500 font-sans">{prod.category}</span>
-                        <span className="text-xs font-bold font-serif text-primary">₦{parseFloat(prod.price).toLocaleString()}</span>
-                      </div>
-                      <h4 className="font-serif text-sm font-semibold text-foreground mt-2 leading-snug">{prod.title}</h4>
-                    </div>
-                    <div className="flex justify-between items-center text-[9px] text-neutral-500 border-t border-border/20 pt-2.5 mt-4">
-                      <span>Inventory Stock: <strong>{prod.instock}</strong></span>
-                      <span className="text-primary hover:underline cursor-pointer">Edit Product</span>
-                    </div>
+                {products.length === 0 ? (
+                  <div className="col-span-full bg-neutral-900/10 p-8 text-center">
+                    <p className="text-xs text-neutral-500">No products listed yet. Click "Add Product" to start selling.</p>
                   </div>
-                ))}
+                ) : (
+                  products.map((prod) => (
+                    <div key={prod.id} className="bg-neutral-900/10 hover:bg-neutral-900/30 p-5 flex flex-col justify-between h-36 transition-all duration-300">
+                      <div>
+                        <div className="flex justify-between items-start">
+                          <span className="text-[8px] uppercase tracking-wider text-neutral-500 font-sans">{prod.category}</span>
+                          <span className="text-xs font-bold font-serif text-primary">₦{prod.price.toLocaleString()}</span>
+                        </div>
+                        <h4 className="font-serif text-sm font-semibold text-foreground mt-2 leading-snug">{prod.title}</h4>
+                      </div>
+                      <div className="flex justify-between items-center text-[9px] text-neutral-500 border-t border-border/20 pt-2.5 mt-4">
+                        <span>Inventory Stock: <strong>{prod.in_stock}</strong></span>
+                        <span className="text-primary hover:underline cursor-pointer">Edit Product</span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             )}
 
             {/* Sub-tab 3: Pitches List */}
             {activeSubTab === "pitches" && (
               <div className="space-y-4">
-                {pitches.map((pitch) => (
-                  <div key={pitch.id} className="bg-neutral-900/10 hover:bg-neutral-900/30 p-5 flex justify-between items-center transition-all duration-300">
-                    <div>
-                      <h4 className="font-serif text-sm font-semibold text-foreground">{pitch.title}</h4>
-                      <p className="text-[10px] text-neutral-400 mt-1 font-sans">Client: {pitch.client} • Bid Price: ₦{parseFloat(pitch.bid).toLocaleString()} • Pitched: {pitch.date}</p>
-                    </div>
-                    <span className="bg-primary/10 text-primary border border-primary/20 text-[9px] uppercase font-bold px-2 py-0.5 shrink-0">
-                      {pitch.status}
-                    </span>
+                {pitches.length === 0 ? (
+                  <div className="bg-neutral-900/10 p-8 text-center">
+                    <p className="text-xs text-neutral-500">No pitches sent yet. Browse open projects and submit your first proposal.</p>
                   </div>
-                ))}
+                ) : (
+                  pitches.map((pitch) => (
+                    <div key={pitch.id} className="bg-neutral-900/10 hover:bg-neutral-900/30 p-5 flex justify-between items-center transition-all duration-300">
+                      <div>
+                        <h4 className="font-serif text-sm font-semibold text-foreground">{pitch.project?.title || "Untitled Project"}</h4>
+                        <p className="text-[10px] text-neutral-400 mt-1 font-sans">
+                          Client: {pitch.project?.client?.full_name || "—"} • Bid Price: ₦{pitch.bid_price.toLocaleString()} • Pitched: {new Date(pitch.created_at).toLocaleDateString("en-NG", { month: "long", day: "numeric", year: "numeric" })}
+                        </p>
+                      </div>
+                      <span className={`text-[9px] uppercase font-bold px-2 py-0.5 shrink-0 border ${
+                        pitch.status === "accepted" 
+                          ? "bg-green-500/10 text-green-600 border-green-500/20" 
+                          : pitch.status === "rejected"
+                          ? "bg-red-500/10 text-red-600 border-red-500/20"
+                          : "bg-primary/10 text-primary border-primary/20"
+                      }`}>
+                        {pitch.status === "pending" ? "Awaiting Review" : pitch.status === "accepted" ? "Accepted (Funding Locked)" : pitch.status}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             )}
 
